@@ -1,6 +1,6 @@
 """
 IQ TRADING BOT - COMPLETE EDITION
-ALL PAIRS FROM YOUR IMAGES | RATE LIMITED SIGNALS
+ALL PAIRS | NO DUPLICATES | FULL AUTO SCAN
 """
 
 import os
@@ -16,7 +16,7 @@ load_dotenv()
 print("""
 ╔════════════════════════════════════════════════════════════════╗
 ║   IQ TRADING BOT - COMPLETE EDITION                            ║
-║   ALL PAIRS FROM YOUR IMAGES | RATE LIMITED SIGNALS            ║
+║   ALL PAIRS | NO DUPLICATES | FULL AUTO SCAN                   ║
 ╚════════════════════════════════════════════════════════════════╝
 """)
 
@@ -54,153 +54,266 @@ settings = {
 }
 
 # ============================================
-# ALL PAIRS FROM YOUR IMAGES
+# COMPLETE DICTIONARY - ALL PAIRS FROM YOUR IMAGES
 # ============================================
 
 ALL_PAIRS = {}
 
-# ========== CURRENCIES from images ==========
-currencies = [
-    # From first image
+# ========== FOREX MAJORS & MINORS ==========
+forex_pairs = [
+    ("EUR/USD", "EURUSD=X", "🇪🇺🇺🇸"),
+    ("GBP/USD", "GBPUSD=X", "🇬🇧🇺🇸"),
+    ("USD/JPY", "JPY=X", "🇺🇸🇯🇵"),
+    ("AUD/USD", "AUDUSD=X", "🇦🇺🇺🇸"),
+    ("USD/CAD", "USDCAD=X", "🇺🇸🇨🇦"),
+    ("NZD/USD", "NZDUSD=X", "🇳🇿🇺🇸"),
+    ("USD/CHF", "CHF=X", "🇺🇸🇨🇭"),
+    ("EUR/GBP", "EURGBP=X", "🇪🇺🇬🇧"),
+    ("EUR/JPY", "EURJPY=X", "🇪🇺🇯🇵"),
+    ("GBP/JPY", "GBPJPY=X", "🇬🇧🇯🇵"),
+    ("AUD/JPY", "AUDJPY=X", "🇦🇺🇯🇵"),
+    ("AUD/CAD", "AUDCAD=X", "🇦🇺🇨🇦"),
+    ("CAD/JPY", "CADJPY=X", "🇨🇦🇯🇵"),
+    ("CAD/CHF", "CADCHF=X", "🇨🇦🇨🇭"),
+    ("CHF/JPY", "CHFJPY=X", "🇨🇭🇯🇵"),
+    ("EUR/AUD", "EURAUD=X", "🇪🇺🇦🇺"),
+    ("EUR/CAD", "EURCAD=X", "🇪🇺🇨🇦"),
+    ("EUR/CHF", "EURCHF=X", "🇪🇺🇨🇭"),
+    ("GBP/AUD", "GBPAUD=X", "🇬🇧🇦🇺"),
+    ("GBP/CAD", "GBPCAD=X", "🇬🇧🇨🇦"),
+    ("GBP/CHF", "GBPCHF=X", "🇬🇧🇨🇭"),
+    ("AUD/CHF", "AUDCHF=X", "🇦🇺🇨🇭"),
+    ("NZD/JPY", "NZDJPY=X", "🇳🇿🇯🇵"),
+    ("EUR/NZD", "EURNZD=X", "🇪🇺🇳🇿"),
+    ("GBP/NZD", "GBPNZD=X", "🇬🇧🇳🇿"),
+]
+
+for name, symbol, flag in forex_pairs:
+    ALL_PAIRS[name] = {"symbol": symbol, "flag": flag, "type": "Forex"}
+
+# ========== EXOTIC FOREX (including ZAR, KES, etc.) ==========
+exotic_pairs = [
+    ("USD/ZAR", "USDZAR=X", "🇺🇸🇿🇦"),
+    ("USD/TRY", "USDTRY=X", "🇺🇸🇹🇷"),
+    ("USD/MXN", "USDMXN=X", "🇺🇸🇲🇽"),
+    ("USD/SGD", "USDSGD=X", "🇺🇸🇸🇬"),
+    ("USD/INR", "USDINR=X", "🇺🇸🇮🇳"),
+    ("USD/BRL", "USDBRL=X", "🇺🇸🇧🇷"),
+    ("USD/RUB", "USDRUB=X", "🇺🇸🇷🇺"),
+    ("USD/THB", "USDTHB=X", "🇺🇸🇹🇭"),
+    ("USD/IDR", "USDIDR=X", "🇺🇸🇮🇩"),
+    ("USD/PHP", "USDPHP=X", "🇺🇸🇵🇭"),
+    ("USD/PKR", "USDPKR=X", "🇺🇸🇵🇰"),
+    ("USD/EGP", "USDEGP=X", "🇺🇸🇪🇬"),
+    ("USD/MYR", "USDMYR=X", "🇺🇸🇲🇾"),
+    ("USD/COP", "USDCOP=X", "🇺🇸🇨🇴"),
+    ("USD/CLP", "USDCLP=X", "🇺🇸🇨🇱"),
+    ("USD/ARS", "USDARS=X", "🇺🇸🇦🇷"),
+    ("USD/BDT", "USDBDT=X", "🇺🇸🇧🇩"),
+    ("USD/KES", "USDKES=X", "🇺🇸🇰🇪"),  # KES/USD
+    ("KES/USD", "KESUSD=X", "🇰🇪🇺🇸"),
+    ("USD/NGN", "USDNGN=X", "🇺🇸🇳🇬"),  # NGN/USD
+    ("NGN/USD", "NGNUSD=X", "🇳🇬🇺🇸"),
+    ("USD/DZD", "USDDZD=X", "🇺🇸🇩🇿"),
+    ("USD/TND", "USDTND=X", "🇺🇸🇹🇳"),
+    ("USD/LBP", "USDLBP=X", "🇺🇸🇱🇧"),
+    ("USD/UAH", "USDUAH=X", "🇺🇸🇺🇦"),
+    ("USD/MAD", "USDMAD=X", "🇺🇸🇲🇦"),
+    ("EUR/TRY", "EURTRY=X", "🇪🇺🇹🇷"),
+    ("EUR/RUB", "EURRUB=X", "🇪🇺🇷🇺"),
+    ("EUR/HUF", "EURHUF=X", "🇪🇺🇭🇺"),
+    ("EUR/ZAR", "EURZAR=X", "🇪🇺🇿🇦"),
+]
+
+for name, symbol, flag in exotic_pairs:
+    ALL_PAIRS[name] = {"symbol": symbol, "flag": flag, "type": "Forex"}
+
+# ========== CNY CROSSES ==========
+cny_pairs = [
+    ("AED/CNY", "AEDCNY=X", "🇦🇪🇨🇳"),
+    ("SAR/CNY", "SARCNY=X", "🇸🇦🇨🇳"),
+    ("QAR/CNY", "QARCNY=X", "🇶🇦🇨🇳"),
+    ("OMR/CNY", "OMRCNY=X", "🇴🇲🇨🇳"),
+    ("BHD/CNY", "BHDCNY=X", "🇧🇭🇨🇳"),
+    ("JOD/CNY", "JODCNY=X", "🇯🇴🇨🇳"),
+    ("NGN/INR", "NGNINR=X", "🇳🇬🇮🇳"),
+    ("NGN/CNY", "NGNCNY=X", "🇳🇬🇨🇳"),
+]
+
+for name, symbol, flag in cny_pairs:
+    ALL_PAIRS[name] = {"symbol": symbol, "flag": flag, "type": "Forex"}
+
+# ========== OTC FOREX (Same symbols, marked OTC) ==========
+otc_forex = [
     "EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD", "NZD/USD", "USD/CHF",
-    # From image 1000322200
-    "EUR/GBP", "EUR/JPY", "GBP/JPY", "AUD/CAD", "CAD/CHF", "CAD/JPY", "CHF/JPY", 
-    "EUR/AUD", "EUR/CAD", "EUR/CHF", "GBP/AUD", "GBP/CAD", "GBP/CHF", "AUD/CHF",
-    # From image 1000322206 (OTC)
-    "EUR/GBP-OTC", "MAD/USD-OTC", "UAH/USD-OTC", "USD/BRL-OTC", "USD/DZD-OTC",
-    "GBP/USD-OTC", "AUD/JPY-OTC", "USD/CLP-OTC", "GBP/AUD-OTC", "LBP/USD-OTC",
-    # From image 1000322204
-    "NGN/USD-OTC", "NZD/USD-OTC", "QAR/CNY-OTC", "SAR/CNY-OTC", "USD/CAD-OTC",
-    "USD/COP-OTC", "USD/INR-OTC", "USD/MXN-OTC", "USD/PKR-OTC", "USD/RUB-OTC",
-    # From image 1000322203
-    "AUD/USD-OTC", "BHD/CNY-OTC", "CAD/CHF-OTC", "EUR/CHF-OTC", "EUR/JPY-OTC",
-    "EUR/TRY-OTC", "EUR/USD-OTC", "GBP/JPY-OTC", "JOD/CNY-OTC", "KES/USD-OTC", "NGN/INR-OTC",
-    # From image 1000322202
-    "USD/SGD-OTC", "CHF/JPY-OTC", "USD/ARS-OTC", "USD/THB-OTC", "EUR/NZD-OTC",
-    "USD/EGP-OTC", "USD/MYR-OTC", "OMR/CNY-OTC", "TND/USD-OTC", "USD/IDR-OTC", "FIIR/GRP-OTC",
-    # From image 1000322191
-    "YER/USD-OTC", "AED/CNY-OTC", "USD/CHF-OTC", "CHF/NOK-OTC", "NZD/JPY-OTC",
-    "USD/BDT-OTC", "USD/JPY-OTC", "CAD/JPY-OTC", "EUR/HUF-OTC", "EUR/RUB-OTC", "USD/PHP-OTC",
+    "EUR/GBP", "EUR/JPY", "GBP/JPY", "AUD/JPY", "AUD/CAD", "CAD/JPY", "CAD/CHF",
+    "CHF/JPY", "EUR/AUD", "EUR/CAD", "EUR/CHF", "GBP/AUD", "GBP/CAD", "GBP/CHF",
+    "AUD/CHF", "NZD/JPY", "USD/ZAR", "USD/TRY", "USD/MXN", "USD/SGD", "USD/INR",
+    "USD/BRL", "USD/RUB", "USD/THB", "USD/IDR", "USD/PHP", "USD/KES", "NGN/USD"
 ]
 
-for pair in currencies:
-    base_pair = pair.replace("-OTC", "")
-    if "OTC" in pair:
-        ALL_PAIRS[pair] = {"symbol": f"{base_pair.replace('/', '')}=X", "flag": "🌍", "type": "Forex-OTC"}
-    else:
-        ALL_PAIRS[pair] = {"symbol": f"{pair.replace('/', '')}=X", "flag": "🌍", "type": "Forex"}
+for name in otc_forex:
+    if name in ALL_PAIRS:
+        ALL_PAIRS[f"{name}-OTC"] = {"symbol": ALL_PAIRS[name]["symbol"], "flag": ALL_PAIRS[name]["flag"], "type": "Forex-OTC"}
 
-# ========== INDICES from images ==========
+# ========== INDICES ==========
 indices = [
-    "AEX 25", "CAC 40", "D30/EUR", "DJI30", "E35EUR", "E50/EUR", "F40/EUR",
-    "HONG KONG 33", "JPN225", "US100", "AUS 200", "100GBP", "SP500",
-    # OTC versions
-    "AUS 200-OTC", "100GBP-OTC", "D30EUR-OTC", "DJI30-OTC", "E35EUR-OTC",
-    "E50EUR-OTC", "F40EUR-OTC", "JPN225-OTC", "US100-OTC", "SP500-OTC"
+    ("US100", "^IXIC", "📊"),
+    ("US30", "^DJI", "📈"),
+    ("US500", "^GSPC", "📊"),
+    ("DJI30", "^DJI", "📈"),
+    ("SP500", "^GSPC", "📊"),
+    ("AEX 25", "^AEX", "📊🇳🇱"),
+    ("CAC 40", "^FCHI", "📊🇫🇷"),
+    ("D30/EUR", "^GDAXI", "📊🇩🇪"),
+    ("E35EUR", "^IBEX", "📊🇪🇸"),
+    ("E50/EUR", "^STOXX50E", "📊🇪🇺"),
+    ("F40/EUR", "^FCHI", "📊🇫🇷"),
+    ("HONG KONG 33", "^HSI", "📊🇭🇰"),
+    ("JPN225", "^N225", "📊🇯🇵"),
+    ("AUS 200", "^AXJO", "📊🇦🇺"),
+    ("100GBP", "^FTSE", "📊🇬🇧"),
+    ("GER30", "^GDAXI", "📊🇩🇪"),
+    ("UK100", "^FTSE", "📊🇬🇧"),
+    ("FRA40", "^FCHI", "📊🇫🇷"),
+    ("ESP35", "^IBEX", "📊🇪🇸"),
 ]
 
-for idx in indices:
-    if "OTC" in idx:
-        name = idx.replace("-OTC", "")
-        ALL_PAIRS[idx] = {"symbol": "^" + name.replace(" ", "").replace("/", ""), "flag": "📊", "type": "Index-OTC"}
-    else:
-        ALL_PAIRS[idx] = {"symbol": "^" + idx.replace(" ", "").replace("/", ""), "flag": "📊", "type": "Index"}
+for name, symbol, flag in indices:
+    ALL_PAIRS[name] = {"symbol": symbol, "flag": flag, "type": "Index"}
 
-# ========== COMMODITIES from images ==========
+# ========== INDICES OTC ==========
+otc_indices = ["AUS 200", "100GBP", "D30/EUR", "DJI30", "E35EUR", "E50/EUR", "F40/EUR", "JPN225", "US100", "SP500"]
+for name in otc_indices:
+    if name in ALL_PAIRS:
+        ALL_PAIRS[f"{name}-OTC"] = {"symbol": ALL_PAIRS[name]["symbol"], "flag": ALL_PAIRS[name]["flag"], "type": "Index-OTC"}
+
+# ========== COMMODITIES ==========
 commodities = [
-    "Gold", "Silver", "Brent Oil", "WTI Crude Oil", "Natural Gas", "Platinum spot", "Palladium spot",
-    "Gold-OTC", "Silver-OTC", "Brent Oil-OTC", "WTI Crude Oil-OTC", "Natural Gas-OTC",
-    "Platinum spot-OTC", "Palladium spot-OTC"
+    ("Gold", "GC=F", "🥇"),
+    ("Silver", "SI=F", "🥈"),
+    ("Brent Oil", "BZ=F", "🛢️"),
+    ("WTI Crude Oil", "CL=F", "🛢️"),
+    ("Natural Gas", "NG=F", "🔥"),
+    ("Platinum", "PL=F", "🔘"),
+    ("Palladium", "PA=F", "🔘"),
+    ("Copper", "HG=F", "🔴"),
 ]
 
-for comm in commodities:
-    if "Gold" in comm:
-        ALL_PAIRS[comm] = {"symbol": "GC=F", "flag": "🥇", "type": "Commodity"}
-    elif "Silver" in comm:
-        ALL_PAIRS[comm] = {"symbol": "SI=F", "flag": "🥈", "type": "Commodity"}
-    elif "Brent" in comm:
-        ALL_PAIRS[comm] = {"symbol": "BZ=F", "flag": "🛢️", "type": "Commodity"}
-    elif "WTI" in comm:
-        ALL_PAIRS[comm] = {"symbol": "CL=F", "flag": "🛢️", "type": "Commodity"}
-    elif "Natural Gas" in comm:
-        ALL_PAIRS[comm] = {"symbol": "NG=F", "flag": "🔥", "type": "Commodity"}
-    elif "Platinum" in comm:
-        ALL_PAIRS[comm] = {"symbol": "PL=F", "flag": "🔘", "type": "Commodity"}
-    elif "Palladium" in comm:
-        ALL_PAIRS[comm] = {"symbol": "PA=F", "flag": "🔘", "type": "Commodity"}
+for name, symbol, flag in commodities:
+    ALL_PAIRS[name] = {"symbol": symbol, "flag": flag, "type": "Commodity"}
 
-# ========== CRYPTOCURRENCIES from images ==========
+# ========== COMMODITIES OTC ==========
+for name, symbol, flag in commodities:
+    ALL_PAIRS[f"{name}-OTC"] = {"symbol": symbol, "flag": flag, "type": "Commodity-OTC"}
+
+# ========== CRYPTOCURRENCIES ==========
 cryptos = [
-    "Bitcoin", "Ethereum", "Solana", "Cardano", "Dogecoin", "Ripple", "Litecoin",
-    "Chainlink", "Avalanche", "Polygon", "TRON",
-    "Bitcoin-OTC", "Ethereum-OTC", "Solana-OTC", "Cardano-OTC", "Dogecoin-OTC",
-    "Chainlink-OTC", "Litecoin-OTC", "Avalanche-OTC", "TRON-OTC", "Polygon-OTC"
+    ("Bitcoin", "BTC-USD", "₿"),
+    ("Ethereum", "ETH-USD", "⟠"),
+    ("Solana", "SOL-USD", "⚡"),
+    ("Cardano", "ADA-USD", "🟣"),
+    ("Dogecoin", "DOGE-USD", "🐕"),
+    ("Ripple", "XRP-USD", "✖️"),
+    ("Litecoin", "LTC-USD", "Ł"),
+    ("Chainlink", "LINK-USD", "🔗"),
+    ("Avalanche", "AVAX-USD", "🔺"),
+    ("Polygon", "MATIC-USD", "🟣"),
+    ("TRON", "TRX-USD", "🔴"),
 ]
 
-for crypto in cryptos:
-    base = crypto.replace("-OTC", "").lower()
-    if "bitcoin" in base:
-        ALL_PAIRS[crypto] = {"symbol": "BTC-USD", "flag": "₿", "type": "Crypto"}
-    elif "ethereum" in base:
-        ALL_PAIRS[crypto] = {"symbol": "ETH-USD", "flag": "⟠", "type": "Crypto"}
-    elif "solana" in base:
-        ALL_PAIRS[crypto] = {"symbol": "SOL-USD", "flag": "⚡", "type": "Crypto"}
-    elif "cardano" in base:
-        ALL_PAIRS[crypto] = {"symbol": "ADA-USD", "flag": "🟣", "type": "Crypto"}
-    elif "dogecoin" in base:
-        ALL_PAIRS[crypto] = {"symbol": "DOGE-USD", "flag": "🐕", "type": "Crypto"}
-    elif "ripple" in base:
-        ALL_PAIRS[crypto] = {"symbol": "XRP-USD", "flag": "✖️", "type": "Crypto"}
-    elif "litecoin" in base:
-        ALL_PAIRS[crypto] = {"symbol": "LTC-USD", "flag": "Ł", "type": "Crypto"}
-    elif "chainlink" in base:
-        ALL_PAIRS[crypto] = {"symbol": "LINK-USD", "flag": "🔗", "type": "Crypto"}
-    elif "avalanche" in base:
-        ALL_PAIRS[crypto] = {"symbol": "AVAX-USD", "flag": "🔺", "type": "Crypto"}
-    elif "polygon" in base:
-        ALL_PAIRS[crypto] = {"symbol": "MATIC-USD", "flag": "🟣", "type": "Crypto"}
-    elif "tron" in base:
-        ALL_PAIRS[crypto] = {"symbol": "TRX-USD", "flag": "🔴", "type": "Crypto"}
+for name, symbol, flag in cryptos:
+    ALL_PAIRS[name] = {"symbol": symbol, "flag": flag, "type": "Crypto"}
 
-# ========== STOCKS from images ==========
+# ========== CRYPTOS OTC ==========
+for name, symbol, flag in cryptos:
+    ALL_PAIRS[f"{name}-OTC"] = {"symbol": symbol, "flag": flag, "type": "Crypto-OTC"}
+
+# ========== STOCKS ==========
 stocks = [
-    "Apple", "Tesla", "Microsoft", "Amazon", "Netflix", "Google", "Meta", "NVIDIA",
-    "AMD", "Intel", "Cisco", "Johnson & Johnson", "McDonald's", "ExxonMobil",
-    "FedEx", "Boeing", "Visa", "JPMorgan", "Citigroup", "Pfizer", "Alibaba",
-    "Coinbase", "GameStop", "Marathon Digital", "Palantir", "American Express",
-    "VIX", "Facebook Inc", "Citi", "JPMorgan Chase & Co",
-    # OTC versions
-    "Apple-OTC", "Tesla-OTC", "Microsoft-OTC", "Amazon-OTC", "Netflix-OTC",
-    "AMD-OTC", "Intel-OTC", "Cisco-OTC", "Johnson & Johnson-OTC", "McDonald's-OTC",
-    "ExxonMobil-OTC", "FedEx-OTC", "Boeing Company-OTC", "VISA-OTC", "Citigroup Inc-OTC",
-    "Pfizer Inc-OTC", "Alibaba-OTC", "Coinbase Global-OTC", "GameStop Corp-OTC",
-    "Marathon Digital Holdings-OTC", "Palantir Technologies-OTC", "American Express-OTC",
-    "VIX-OTC", "Facebook Inc-OTC", "Citi-OTC"
+    ("Apple", "AAPL", "🍎"),
+    ("Tesla", "TSLA", "🚗"),
+    ("Microsoft", "MSFT", "💻"),
+    ("Amazon", "AMZN", "📦"),
+    ("Netflix", "NFLX", "🎬"),
+    ("Google", "GOOGL", "🔍"),
+    ("Meta", "META", "📘"),
+    ("Facebook Inc", "META", "📘"),
+    ("NVIDIA", "NVDA", "🎮"),
+    ("AMD", "AMD", "💻"),
+    ("Intel", "INTC", "💻"),
+    ("Cisco", "CSCO", "🌐"),
+    ("Johnson & Johnson", "JNJ", "💊"),
+    ("McDonald's", "MCD", "🍔"),
+    ("ExxonMobil", "XOM", "⛽"),
+    ("FedEx", "FDX", "📦"),
+    ("Boeing", "BA", "✈️"),
+    ("Boeing Company", "BA", "✈️"),
+    ("Visa", "V", "💳"),
+    ("VISA", "V", "💳"),
+    ("JPMorgan", "JPM", "🏦"),
+    ("JPMorgan Chase & Co", "JPM", "🏦"),
+    ("Citigroup", "C", "🏦"),
+    ("Citi", "C", "🏦"),
+    ("Citigroup Inc", "C", "🏦"),
+    ("Pfizer", "PFE", "💊"),
+    ("Pfizer Inc", "PFE", "💊"),
+    ("Alibaba", "BABA", "🛒"),
+    ("Coinbase", "COIN", "₿"),
+    ("Coinbase Global", "COIN", "₿"),
+    ("GameStop", "GME", "🎮"),
+    ("GameStop Corp", "GME", "🎮"),
+    ("Marathon Digital", "MARA", "₿"),
+    ("Marathon Digital Holdings", "MARA", "₿"),
+    ("Palantir", "PLTR", "🔍"),
+    ("Palantir Technologies", "PLTR", "🔍"),
+    ("American Express", "AXP", "💳"),
+    ("VIX", "^VIX", "📊"),
 ]
 
-stock_symbols = {
-    "Apple": "AAPL", "Tesla": "TSLA", "Microsoft": "MSFT", "Amazon": "AMZN",
-    "Netflix": "NFLX", "Google": "GOOGL", "Meta": "META", "NVIDIA": "NVDA",
-    "AMD": "AMD", "Intel": "INTC", "Cisco": "CSCO", "Johnson & Johnson": "JNJ",
-    "McDonald's": "MCD", "ExxonMobil": "XOM", "FedEx": "FDX", "Boeing": "BA",
-    "Visa": "V", "JPMorgan": "JPM", "Citigroup": "C", "Pfizer": "PFE",
-    "Alibaba": "BABA", "Coinbase": "COIN", "GameStop": "GME", "Marathon Digital": "MARA",
-    "Palantir": "PLTR", "American Express": "AXP", "VIX": "^VIX", "Facebook Inc": "META",
-    "Citi": "C", "JPMorgan Chase & Co": "JPM"
-}
+for name, symbol, flag in stocks:
+    ALL_PAIRS[name] = {"symbol": symbol, "flag": flag, "type": "Stock"}
 
-for stock in stocks:
-    base = stock.replace("-OTC", "")
-    if base in stock_symbols:
-        ALL_PAIRS[stock] = {"symbol": stock_symbols[base], "flag": "📈", "type": "Stock"}
+# ========== STOCKS OTC ==========
+otc_stocks = ["Apple", "Tesla", "Microsoft", "Amazon", "Netflix", "AMD", "Intel", "Cisco", 
+              "Johnson & Johnson", "McDonald's", "ExxonMobil", "FedEx", "Boeing Company", 
+              "VISA", "Citigroup Inc", "Pfizer Inc", "Alibaba", "Coinbase Global", 
+              "GameStop Corp", "Marathon Digital Holdings", "Palantir Technologies", 
+              "American Express", "VIX", "Facebook Inc", "Citi"]
+for name in otc_stocks:
+    if name in ALL_PAIRS:
+        ALL_PAIRS[f"{name}-OTC"] = {"symbol": ALL_PAIRS[name]["symbol"], "flag": ALL_PAIRS[name]["flag"], "type": "Stock-OTC"}
+
+# ========== ADD ANY MISSING PAIRS FROM YOUR IMAGES ==========
+# MAD/USD, UAH/USD, LBP/USD, CLP, DZD, etc.
+extra_pairs = [
+    ("MAD/USD", "MADUSD=X", "🇲🇦🇺🇸"),
+    ("UAH/USD", "UAHUSD=X", "🇺🇦🇺🇸"),
+    ("LBP/USD", "LBPUSD=X", "🇱🇧🇺🇸"),
+    ("MAD/USD-OTC", "MADUSD=X", "🇲🇦🇺🇸"),
+    ("UAH/USD-OTC", "UAHUSD=X", "🇺🇦🇺🇸"),
+    ("LBP/USD-OTC", "LBPUSD=X", "🇱🇧🇺🇸"),
+    ("USD/CLP-OTC", "USDCLP=X", "🇺🇸🇨🇱"),
+    ("USD/DZD-OTC", "USDDZD=X", "🇺🇸🇩🇿"),
+    ("USD/COP-OTC", "USDCOP=X", "🇺🇸🇨🇴"),
+    ("USD/EGP-OTC", "USDEGP=X", "🇺🇸🇪🇬"),
+    ("USD/IDR-OTC", "USDIDR=X", "🇺🇸🇮🇩"),
+    ("USD/MYR-OTC", "USDMYR=X", "🇺🇸🇲🇾"),
+    ("USD/THB-OTC", "USDTHB=X", "🇺🇸🇹🇭"),
+    ("CHF/NOK", "CHFNOK=X", "🇨🇭🇳🇴"),
+    ("CHF/NOK-OTC", "CHFNOK=X", "🇨🇭🇳🇴"),
+    ("EUR/NZD-OTC", "EURNZD=X", "🇪🇺🇳🇿"),
+    ("FIIR/GRP", "FIIRGRP=X", "🌍"),
+]
+
+for name, symbol, flag in extra_pairs:
+    ALL_PAIRS[name] = {"symbol": symbol, "flag": flag, "type": "Forex"}
 
 print(f"✅ Loaded {len(ALL_PAIRS)} tradable instruments")
 
-# Priority pairs for auto-scan (spread out - no duplicates)
-AUTO_PAIRS = [
-    "EUR/USD", "GBP/USD", "USD/JPY", "Gold", "Bitcoin", "US100", "Apple", "Tesla",
-    "Silver", "Ethereum", "DJI30", "Microsoft", "EUR/GBP", "Solana", "Amazon"
-]
+# ========== AUTO SCAN ALL PAIRS (No duplicates, all pairs) ==========
+ALL_PAIR_NAMES = list(ALL_PAIRS.keys())
+print(f"📊 Auto-scan will cover all {len(ALL_PAIR_NAMES)} pairs")
 
 # ============================================
 # PRICE & RSI FUNCTIONS
@@ -316,16 +429,22 @@ def get_signal_data(name, symbol, flag):
     return None
 
 # ============================================
-# AUTO MONITOR WITH RATE LIMITING
+# AUTO MONITOR - ALL PAIRS, NO DUPLICATES
 # ============================================
 
 async def monitor_pairs():
-    print("🔄 Auto monitor started - checking every 60 seconds")
-    print(f"📊 Monitoring {len(AUTO_PAIRS)} priority pairs")
+    print("🔄 Auto monitor started - checking all pairs")
+    print(f"📊 Total pairs to monitor: {len(ALL_PAIR_NAMES)}")
+    print(f"⏰ Rate limit: 30 minutes between signals per pair")
+    
+    current_index = 0
     
     while True:
         try:
-            for i, name in enumerate(AUTO_PAIRS):
+            # Get a batch of pairs (10 at a time to avoid rate limits)
+            batch = ALL_PAIR_NAMES[current_index:current_index + 10]
+            
+            for name in batch:
                 if name not in ALL_PAIRS:
                     continue
                     
@@ -351,16 +470,17 @@ async def monitor_pairs():
                             signal_data["reason"], is_manual=False
                         )
                         await bot.send_message(chat_id=CHAT_ID, text=message)
-                        print(f"📤 AUTO SIGNAL: {name} {signal_data['direction']} (RSI: {signal_data['rsi']})")
-                    else:
-                        minutes_left = int(1800 - (current_time - last_time)) // 60
-                        print(f"⏳ Rate limited: {name} - next signal in {minutes_left} min")
+                        print(f"📤 SIGNAL: {name} {signal_data['direction']} (RSI: {signal_data['rsi']})")
                 
-                # Stagger the API calls
-                await asyncio.sleep(5)
+                await asyncio.sleep(2)  # Small delay between pairs
             
-            print(f"💓 Monitor cycle complete at {format_time()}")
-            await asyncio.sleep(60)  # Wait 1 minute before next full cycle
+            # Move to next batch
+            current_index += 10
+            if current_index >= len(ALL_PAIR_NAMES):
+                current_index = 0
+                print(f"💓 Full cycle complete at {format_time()}")
+            
+            await asyncio.sleep(30)  # Wait before next batch
             
         except Exception as e:
             print(f"Monitor error: {e}")
@@ -375,15 +495,16 @@ async def start_command(update, context):
         f"🤖 IQ TRADING BOT - COMPLETE EDITION\n\n"
         f"✅ Bot is ONLINE!\n\n"
         f"📈 Total instruments: {len(ALL_PAIRS)}\n"
-        f"   • Forex: 80+ pairs (including OTC)\n"
-        f"   • Indices: 20+ (including OTC)\n"
-        f"   • Commodities: 14 (including OTC)\n"
-        f"   • Crypto: 20+ (including OTC)\n"
-        f"   • Stocks: 50+ (including OTC)\n\n"
-        f"⚡ Signal Mode: REAL-TIME (rate limited to 30 min per pair)\n"
-        f"🎯 Trigger: RSI < 30 = BUY | RSI > 70 = SELL\n\n"
+        f"   • Forex: All majors, minors, exotics\n"
+        f"   • Indices: US100, DJI30, SP500, AEX, CAC, DAX, etc.\n"
+        f"   • Commodities: Gold, Silver, Oil, Gas\n"
+        f"   • Crypto: Bitcoin, Ethereum, Solana, etc.\n"
+        f"   • Stocks: Apple, Tesla, Microsoft, etc.\n\n"
+        f"⚡ Auto-scan: ALL {len(ALL_PAIRS)} pairs continuously\n"
+        f"🎯 Trigger: RSI < 30 = BUY | RSI > 70 = SELL\n"
+        f"⏰ Rate limit: 30 minutes per pair\n\n"
         f"📋 Commands:\n"
-        f"   /signal [pair] - Manual signal\n"
+        f"   /signal [pair] - Manual signal (e.g., /signal Gold)\n"
         f"   /pairs - List all pairs\n"
         f"   /status - Bot status\n\n"
         f"⏰ Nigeria Time: {format_time()}"
@@ -391,14 +512,16 @@ async def start_command(update, context):
 
 async def signal_command(update, context):
     if not context.args:
-        sample = list(ALL_PAIRS.keys())[:20]
+        sample = list(ALL_PAIRS.keys())[:30]
         await update.message.reply_text(
             f"⚠️ Usage: /signal [pair name]\n\n"
             f"Examples: /signal Gold\n"
             f"          /signal EUR/USD\n"
-            f"          /signal Bitcoin\n\n"
-            f"Available: {', '.join(sample)}...\n"
-            f"Total: {len(ALL_PAIRS)} instruments"
+            f"          /signal Bitcoin\n"
+            f"          /signal USD/ZAR\n"
+            f"          /signal KES/USD\n\n"
+            f"Available ({len(ALL_PAIRS)} total): {', '.join(sample)}...\n\n"
+            f"Type /pairs to see categories"
         )
         return
     
@@ -406,6 +529,7 @@ async def signal_command(update, context):
     
     # Try exact match
     if name not in ALL_PAIRS:
+        # Try case-insensitive match
         found = None
         for key in ALL_PAIRS.keys():
             if key.lower() == name.lower():
@@ -447,20 +571,20 @@ async def signal_command(update, context):
         )
 
 async def pairs_command(update, context):
-    forex = [p for p, info in ALL_PAIRS.items() if "Forex" in info["type"]]
+    forex = [p for p, info in ALL_PAIRS.items() if info["type"] in ["Forex", "Forex-OTC"]]
     indices = [p for p, info in ALL_PAIRS.items() if "Index" in info["type"]]
-    commodities = [p for p, info in ALL_PAIRS.items() if info["type"] == "Commodity"]
-    crypto = [p for p, info in ALL_PAIRS.items() if info["type"] == "Crypto"]
-    stocks = [p for p, info in ALL_PAIRS.items() if info["type"] == "Stock"]
+    commodities = [p for p, info in ALL_PAIRS.items() if "Commodity" in info["type"]]
+    crypto = [p for p, info in ALL_PAIRS.items() if "Crypto" in info["type"]]
+    stocks = [p for p, info in ALL_PAIRS.items() if "Stock" in info["type"]]
     
     await update.message.reply_text(
         f"📊 AVAILABLE INSTRUMENTS\n\n"
-        f"Forex ({len(forex)}): {', '.join(forex[:15])}{'...' if len(forex) > 15 else ''}\n\n"
-        f"Indices ({len(indices)}): {', '.join(indices[:10])}{'...' if len(indices) > 10 else ''}\n\n"
+        f"Forex ({len(forex)}): {', '.join(forex[:20])}{'...' if len(forex) > 20 else ''}\n\n"
+        f"Indices ({len(indices)}): {', '.join(indices[:15])}{'...' if len(indices) > 15 else ''}\n\n"
         f"Commodities ({len(commodities)}): {', '.join(commodities)}\n\n"
-        f"Crypto ({len(crypto)}): {', '.join(crypto[:10])}{'...' if len(crypto) > 10 else ''}\n\n"
-        f"Stocks ({len(stocks)}): {', '.join(stocks[:15])}{'...' if len(stocks) > 15 else ''}\n\n"
-        f"Total: {len(ALL_PAIRS)} instruments\n\n"
+        f"Crypto ({len(crypto)}): {', '.join(crypto[:15])}{'...' if len(crypto) > 15 else ''}\n\n"
+        f"Stocks ({len(stocks)}): {', '.join(stocks[:20])}{'...' if len(stocks) > 20 else ''}\n\n"
+        f"TOTAL: {len(ALL_PAIRS)} instruments\n\n"
         f"Type /signal [name] for any instrument"
     )
 
@@ -470,7 +594,7 @@ async def status_command(update, context):
         f"✅ Status: ONLINE\n"
         f"📈 Total instruments: {len(ALL_PAIRS)}\n"
         f"🎯 Total signals sent: {settings['total_signals']}\n"
-        f"⚡ Auto-scan: {len(AUTO_PAIRS)} priority pairs\n"
+        f"⚡ Auto-scan: ALL {len(ALL_PAIRS)} pairs\n"
         f"⏰ Rate limit: 30 minutes between signals per pair\n"
         f"🎯 Signal trigger: RSI < 30 = BUY | RSI > 70 = SELL\n"
         f"⏰ Time Zone: Nigeria (WAT)\n"
@@ -490,14 +614,14 @@ application.add_handler(CommandHandler("status", status_command))
 async def send_startup():
     await bot.send_message(
         chat_id=CHAT_ID,
-        text=f"🤖 IQ TRADING BOT - COMPLETE EDITION\n\n✅ Bot is ONLINE!\n📈 Total instruments: {len(ALL_PAIRS)}\n⚡ Auto-signals rate limited to 30 min per pair\n🎯 Type /signal [pair] for manual analysis\n\n⏰ Nigeria Time: {format_time()}"
+        text=f"🤖 IQ TRADING BOT - COMPLETE EDITION\n\n✅ Bot is ONLINE!\n📈 Total instruments: {len(ALL_PAIRS)}\n⚡ Auto-scanning ALL pairs continuously\n🎯 Type /signal [pair] for manual analysis\n\n⏰ Nigeria Time: {format_time()}"
     )
 
 async def main():
     await send_startup()
     print(f"🚀 Bot is running!")
     print(f"📈 Total instruments: {len(ALL_PAIRS)}")
-    print(f"🔄 Auto-monitoring {len(AUTO_PAIRS)} priority pairs")
+    print(f"🔄 Auto-scanning ALL {len(ALL_PAIRS)} pairs continuously")
     print(f"⏰ Rate limit: 30 minutes between signals per pair")
     print(f"📋 Commands: /signal [pair], /pairs, /status")
     
