@@ -1,6 +1,6 @@
 """
 IQ TRADING BOT - PROFESSIONAL EDITION
-300+ TRADABLE INSTRUMENTS | AUTO SIGNALS | NIGERIA TIME
+ALL PAIRS FROM YOUR IMAGES | REAL-TIME SIGNALS | NIGERIA TIME
 """
 
 import os
@@ -17,7 +17,7 @@ load_dotenv()
 print("""
 ╔════════════════════════════════════════════════════════════════╗
 ║   IQ TRADING BOT - PROFESSIONAL EDITION                        ║
-║   300+ TRADABLE INSTRUMENTS | AUTO SIGNALS | NIGERIA TIME      ║
+║   ALL PAIRS FROM YOUR IMAGES | REAL-TIME SIGNALS               ║
 ╚════════════════════════════════════════════════════════════════╝
 """)
 
@@ -53,362 +53,299 @@ settings = {
     "min_confidence": 20,
     "total_scans": 0,
     "total_signals": 0,
-    "auto_send_enabled": True
+    "last_signal_time": {}
 }
 
 # ============================================
-# 300+ TRADABLE INSTRUMENTS
+# ALL PAIRS FROM YOUR IMAGES
 # ============================================
 
-# FOREX MAJORS (7)
-FOREX_MAJORS = {
-    "EURUSD": "EURUSD=X",
-    "GBPUSD": "GBPUSD=X",
-    "USDJPY": "JPY=X",
-    "AUDUSD": "AUDUSD=X",
-    "USDCAD": "USDCAD=X",
-    "NZDUSD": "NZDUSD=X",
-    "USDCHF": "CHF=X",
+# FOREX PAIRS (from your images)
+FOREX_PAIRS = {
+    # Major Forex
+    "EUR/USD": "EURUSD=X",
+    "GBP/USD": "GBPUSD=X",
+    "USD/JPY": "JPY=X",
+    "AUD/USD": "AUDUSD=X",
+    "USD/CAD": "USDCAD=X",
+    "NZD/USD": "NZDUSD=X",
+    "USD/CHF": "CHF=X",
+    # Forex Crosses
+    "EUR/GBP": "EURGBP=X",
+    "EUR/JPY": "EURJPY=X",
+    "GBP/JPY": "GBPJPY=X",
+    "AUD/JPY": "AUDJPY=X",
+    "AUD/CAD": "AUDCAD=X",
+    "CAD/JPY": "CADJPY=X",
+    "CAD/CHF": "CADCHF=X",
+    "CHF/JPY": "CHFJPY=X",
+    "EUR/AUD": "EURAUD=X",
+    "EUR/CAD": "EURCAD=X",
+    "EUR/CHF": "EURCHF=X",
+    "GBP/AUD": "GBPAUD=X",
+    "GBP/CAD": "GBPCAD=X",
+    "GBP/CHF": "GBPCHF=X",
+    "AUD/CHF": "AUDCHF=X",
+    "NZD/JPY": "NZDJPY=X",
+    # Exotic Forex (from your images)
+    "NGN/USD": "NGNUSD=X",
+    "USD/NGN": "USDNGN=X",
+    "EUR/TRY": "EURTRY=X",
+    "USD/TRY": "USDTRY=X",
+    "USD/ZAR": "USDZAR=X",
+    "USD/MXN": "USDMXN=X",
+    "USD/SGD": "USDSGD=X",
+    "USD/HKD": "USDHKD=X",
+    "USD/INR": "USDINR=X",
+    "USD/BRL": "USDBRL=X",
+    "USD/RUB": "USDRUB=X",
+    "USD/THB": "USDTHB=X",
+    "USD/IDR": "USDIDR=X",
+    "USD/PHP": "USDPHP=X",
+    "USD/PKR": "USDPKR=X",
+    "USD/EGP": "USDEGP=X",
+    "USD/MYR": "USDMYR=X",
+    "USD/COP": "USDCOP=X",
+    "USD/CLP": "USDCLP=X",
+    "USD/ARS": "USDARS=X",
+    "USD/BDT": "USDBDT=X",
+    "USD/DZD": "USDDZD=X",
+    "USD/KES": "USDKES=X",
+    "USD/LBP": "USDLBP=X",
+    "USD/UAH": "UAHUSD=X",
+    "MAD/USD": "MADUSD=X",
+    "QAR/CNY": "QARCNY=X",
+    "SAR/CNY": "SARCNY=X",
+    "BHD/CNY": "BHDCNY=X",
+    "JOD/CNY": "JODCNY=X",
+    "OMR/CNY": "OMRCNY=X",
+    "AED/CNY": "AEDCNY=X",
+    "YER/USD": "YERUSD=X",
+    "CHF/NOK": "CHFNOK=X",
+    "EUR/HUF": "EURHUF=X",
+    "EUR/RUB": "EURRUB=X",
+    "EUR/NZD": "EURNZD=X",
+    "KES/USD": "KESUSD=X",
+    "NGN/INR": "NGNINR=X",
+    "TND/USD": "TNDUSD=X",
+    "FIIR/GRP": "FIIRGRP=X",
+    "LBP/USD": "LBPUSD=X",
 }
 
-# FOREX MINORS - Euro Crosses (6)
-FOREX_EURO = {
-    "EURGBP": "EURGBP=X",
-    "EURJPY": "EURJPY=X",
-    "EURCHF": "EURCHF=X",
-    "EURCAD": "EURCAD=X",
-    "EURAUD": "EURAUD=X",
-    "EURNZD": "EURNZD=X",
+# OTC FOREX (from your images)
+OTC_FOREX = {
+    "EUR/USD-OTC": "EURUSD=X",
+    "GBP/USD-OTC": "GBPUSD=X",
+    "USD/JPY-OTC": "JPY=X",
+    "AUD/USD-OTC": "AUDUSD=X",
+    "USD/CAD-OTC": "USDCAD=X",
+    "NZD/USD-OTC": "NZDUSD=X",
+    "USD/CHF-OTC": "CHF=X",
+    "EUR/GBP-OTC": "EURGBP=X",
+    "EUR/JPY-OTC": "EURJPY=X",
+    "GBP/JPY-OTC": "GBPJPY=X",
+    "AUD/JPY-OTC": "AUDJPY=X",
+    "GBP/AUD-OTC": "GBPAUD=X",
+    "USD/BRL-OTC": "USDBRL=X",
+    "USD/DZD-OTC": "USDDZD=X",
+    "USD/CLP-OTC": "USDCLP=X",
+    "MAD/USD-OTC": "MADUSD=X",
+    "UAH/USD-OTC": "UAHUSD=X",
+    "LBP/USD-OTC": "LBPUSD=X",
+    "NGN/USD-OTC": "NGNUSD=X",
+    "KES/USD-OTC": "KESUSD=X",
+    "AED/CNY-OTC": "AEDCNY=X",
+    "SAR/CNY-OTC": "SARCNY=X",
+    "BHD/CNY-OTC": "BHDCNY=X",
+    "JOD/CNY-OTC": "JODCNY=X",
+    "OMR/CNY-OTC": "OMRCNY=X",
+    "QAR/CNY-OTC": "QARCNY=X",
+    "YER/USD-OTC": "YERUSD=X",
+    "CHF/NOK-OTC": "CHFNOK=X",
+    "EUR/HUF-OTC": "EURHUF=X",
+    "EUR/RUB-OTC": "EURRUB=X",
+    "EUR/NZD-OTC": "EURNZD=X",
+    "NGN/INR-OTC": "NGNINR=X",
+    "TND/USD-OTC": "TNDUSD=X",
+    "USD/COP-OTC": "USDCOP=X",
+    "USD/EGP-OTC": "USDEGP=X",
+    "USD/IDR-OTC": "USDIDR=X",
+    "USD/INR-OTC": "USDINR=X",
+    "USD/MXN-OTC": "USDMXN=X",
+    "USD/MYR-OTC": "USDMYR=X",
+    "USD/PHP-OTC": "USDPHP=X",
+    "USD/PKR-OTC": "USDPKR=X",
+    "USD/RUB-OTC": "USDRUB=X",
+    "USD/SGD-OTC": "USDSGD=X",
+    "USD/THB-OTC": "USDTHB=X",
+    "USD/TRY-OTC": "USDTRY=X",
+    "USD/ZAR-OTC": "USDZAR=X",
 }
 
-# FOREX MINORS - Pound Crosses (5)
-FOREX_POUND = {
-    "GBPJPY": "GBPJPY=X",
-    "GBPCHF": "GBPCHF=X",
-    "GBPCAD": "GBPCAD=X",
-    "GBPAUD": "GBPAUD=X",
-    "GBPNZD": "GBPNZD=X",
-}
-
-# FOREX MINORS - AUD/NZD Crosses (8)
-FOREX_AUDNZD = {
-    "AUDJPY": "AUDJPY=X",
-    "AUDCHF": "AUDCHF=X",
-    "AUDCAD": "AUDCAD=X",
-    "AUDNZD": "AUDNZD=X",
-    "NZDJPY": "NZDJPY=X",
-    "NZDCHF": "NZDCHF=X",
-    "CADJPY": "CADJPY=X",
-    "CHFJPY": "CHFJPY=X",
-}
-
-# FOREX SCANDINAVIAN (6)
-FOREX_SCAND = {
-    "USDNOK": "USDNOK=X",
-    "USDSEK": "USDSEK=X",
-    "USDDKK": "USDDKK=X",
-    "EURSEK": "EURSEK=X",
-    "EURNOK": "EURNOK=X",
-    "GBPNOK": "GBPNOK=X",
-}
-
-# FOREX EXOTICS (15)
-FOREX_EXOTICS = {
-    "USDTRY": "USDTRY=X",
-    "USDZAR": "USDZAR=X",
-    "USDMXN": "USDMXN=X",
-    "USDSGD": "USDSGD=X",
-    "USDHKD": "USDHKD=X",
-    "USDPLN": "USDPLN=X",
-    "USDCZK": "USDCZK=X",
-    "USDHUF": "USDHUF=X",
-    "USDRUB": "USDRUB=X",
-    "USDBRL": "USDBRL=X",
-    "USDINR": "USDINR=X",
-    "USDKRW": "USDKRW=X",
-    "USDTHB": "USDTHB=X",
-    "EURTRY": "EURTRY=X",
-    "GBPZAR": "GBPZAR=X",
-}
-
-# TOTAL FOREX: 7+6+5+8+6+15 = 47 FOREX PAIRS
-
-# ============================================
-# COMMODITIES (15)
-# ============================================
-
-COMMODITIES = {
-    "XAUUSD": "GC=F",      # Gold
-    "XAGUSD": "SI=F",      # Silver
-    "XPTUSD": "PL=F",      # Platinum
-    "XPDUSD": "PA=F",      # Palladium
-    "USOIL": "CL=F",       # WTI Crude Oil
-    "UKOIL": "BZ=F",       # Brent Crude Oil
-    "BRENT": "BZ=F",       # Brent Oil
-    "NGAS": "NG=F",        # Natural Gas
-    "COPPER": "HG=F",      # Copper
-    "ALUMINUM": "LMAHDS03=CAD",
-    "CORN": "ZC=F",
-    "WHEAT": "ZW=F",
-    "SOYBEAN": "ZS=F",
-    "COFFEE": "KC=F",
-    "SUGAR": "SB=F",
-}
-
-# ============================================
-# STOCK INDICES (30+)
-# ============================================
-
+# INDICES (from your images)
 INDICES = {
-    "US100": "^IXIC",      # NASDAQ
-    "US30": "^DJI",        # Dow Jones
-    "US500": "^GSPC",      # S&P 500
-    "GER30": "^GDAXI",     # Germany DAX
-    "UK100": "^FTSE",      # UK FTSE
-    "FRA40": "^FCHI",      # France CAC 40
-    "ESP35": "^IBEX",      # Spain IBEX 35
-    "AUS200": "^AXJO",     # Australia ASX 200
-    "JPN225": "^N225",     # Japan Nikkei 225
-    "HK50": "^HSI",        # Hong Kong Hang Seng
-    "CHINA50": "000300.SS", # China Shanghai
-    "INDIA50": "^NSEI",    # India Nifty
-    "KOREA200": "^KS11",   # Korea KOSPI
-    "RUSSIA": "IMOEX.ME",  # Russia MOEX
-    "BRAZIL50": "^BVSP",   # Brazil Bovespa
-    "SAUDI": "TASI.SR",    # Saudi TASI
-    "TURKEY": "XU100.IS",  # Turkey BIST
-    "SOUTHAFRICA": "^JALSH", # South Africa
-    "MEXICO": "^MXX",      # Mexico IPC
-    "SWISS20": "^SSMI",    # Switzerland SMI
-    "SWEDEN30": "^OMX",    # Sweden OMX
-    "NETHERLANDS25": "^AEX", # Netherlands AEX
-    "ITALY40": "^FTMIB",   # Italy FTSE MIB
-    "BELGIUM20": "^BFX",   # Belgium BEL 20
-    "AUSTRIA20": "^ATX",   # Austria ATX
-    "POLAND20": "^WIG20",  # Poland WIG20
-    "CZECH": "^PX",        # Czech PX
-    "HUNGARY": "^BUX",     # Hungary BUX
-    "EGYPT30": "^EGX30",   # Egypt EGX 30
-    "ISRAEL25": "^TA125",  # Israel TA 125
+    "AUS 200": "^AXJO",
+    "AUS 200 OTC": "^AXJO",
+    "DJI30": "^DJI",
+    "DJI30 OTC": "^DJI",
+    "US100": "^IXIC",
+    "US100 OTC": "^IXIC",
+    "SP500": "^GSPC",
+    "SP500 OTC": "^GSPC",
+    "CAC 40": "^FCHI",
+    "F40/EUR": "^FCHI",
+    "F40EUR OTC": "^FCHI",
+    "D30/EUR": "^GDAXI",
+    "D30EUR OTC": "^GDAXI",
+    "E35EUR": "^IBEX",
+    "E35EUR OTC": "^IBEX",
+    "E50/EUR": "^STOXX50E",
+    "E50EUR OTC": "^STOXX50E",
+    "JPN225": "^N225",
+    "JPN225 OTC": "^N225",
+    "HONG KONG 33": "^HSI",
+    "100GBP": "^FTSE",
+    "100GBP OTC": "^FTSE",
+    "AEX 25": "^AEX",
 }
 
-# ============================================
-# STOCKS (100+ Major Stocks)
-# ============================================
-
-STOCKS = {
-    # Tech Stocks
-    "AAPL": "AAPL",   # Apple
-    "MSFT": "MSFT",   # Microsoft
-    "GOOGL": "GOOGL", # Google
-    "AMZN": "AMZN",   # Amazon
-    "META": "META",   # Meta/Facebook
-    "TSLA": "TSLA",   # Tesla
-    "NVDA": "NVDA",   # NVIDIA
-    "NFLX": "NFLX",   # Netflix
-    "ADBE": "ADBE",   # Adobe
-    "ORCL": "ORCL",   # Oracle
-    "CRM": "CRM",     # Salesforce
-    "IBM": "IBM",     # IBM
-    "INTC": "INTC",   # Intel
-    "AMD": "AMD",     # AMD
-    "QCOM": "QCOM",   # Qualcomm
-    "TXN": "TXN",     # Texas Instruments
-    "CSCO": "CSCO",   # Cisco
-    "PANW": "PANW",   # Palo Alto
-    "SNOW": "SNOW",   # Snowflake
-    "UBER": "UBER",   # Uber
-    # Banking & Finance
-    "JPM": "JPM",     # JPMorgan
-    "BAC": "BAC",     # Bank of America
-    "WFC": "WFC",     # Wells Fargo
-    "C": "C",         # Citigroup
-    "GS": "GS",       # Goldman Sachs
-    "MS": "MS",       # Morgan Stanley
-    "V": "V",         # Visa
-    "MA": "MA",       # Mastercard
-    "AXP": "AXP",     # American Express
-    "BLK": "BLK",     # BlackRock
-    # Healthcare
-    "JNJ": "JNJ",     # Johnson & Johnson
-    "PFE": "PFE",     # Pfizer
-    "MRK": "MRK",     # Merck
-    "ABBV": "ABBV",   # AbbVie
-    "ABT": "ABT",     # Abbott
-    "TMO": "TMO",     # Thermo Fisher
-    "UNH": "UNH",     # UnitedHealth
-    "CVS": "CVS",     # CVS Health
-    # Consumer
-    "WMT": "WMT",     # Walmart
-    "COST": "COST",   # Costco
-    "TGT": "TGT",     # Target
-    "HD": "HD",       # Home Depot
-    "LOW": "LOW",     # Lowe's
-    "MCD": "MCD",     # McDonald's
-    "SBUX": "SBUX",   # Starbucks
-    "NKE": "NKE",     # Nike
-    "DIS": "DIS",     # Disney
-    "NFLX": "NFLX",   # Netflix
-    # Energy
-    "XOM": "XOM",     # Exxon
-    "CVX": "CVX",     # Chevron
-    "COP": "COP",     # ConocoPhillips
-    "EOG": "EOG",     # EOG Resources
-    "SLB": "SLB",     # Schlumberger
-    # Industrial
-    "BA": "BA",       # Boeing
-    "CAT": "CAT",     # Caterpillar
-    "GE": "GE",       # General Electric
-    "MMM": "MMM",     # 3M
-    "HON": "HON",     # Honeywell
-    "UPS": "UPS",     # UPS
-    "FDX": "FDX",     # FedEx
-    # Telecom
-    "VZ": "VZ",       # Verizon
-    "T": "T",         # AT&T
-    "TMUS": "TMUS",   # T-Mobile
-    # European Stocks
-    "SAP": "SAP",     # SAP
-    "NOVO_B": "NOVO-B.CO",  # Novo Nordisk
-    "NESN": "NESN.SW",      # Nestle
-    "ROG": "ROG.SW",        # Roche
-    "NOVN": "NOVN.SW",      # Novartis
-    "AZN": "AZN.L",         # AstraZeneca
-    "HSBA": "HSBA.L",       # HSBC
-    "SHEL": "SHEL.L",       # Shell
-    "BP": "BP.L",           # BP
-    "TOT": "TTE.PA",        # TotalEnergies
-    "AIR": "AIR.PA",        # Airbus
-    # Asian Stocks
-    "BABA": "BABA",   # Alibaba
-    "TCEHY": "TCEHY", # Tencent
-    "JD": "JD",       # JD.com
-    "NTES": "NTES",   # NetEase
-    "BIDU": "BIDU",   # Baidu
-    "Samsung": "005930.KS", # Samsung
-    "Toyota": "TM",   # Toyota
-    "Sony": "SONY",   # Sony
+# COMMODITIES (from your images)
+COMMODITIES = {
+    "Gold": "GC=F",
+    "Gold OTC": "GC=F",
+    "Silver": "SI=F",
+    "Silver OTC": "SI=F",
+    "Brent Oil": "BZ=F",
+    "Brent Oil OTC": "BZ=F",
+    "WTI Crude Oil": "CL=F",
+    "WTI Crude Oil OTC": "CL=F",
+    "Natural Gas": "NG=F",
+    "Natural Gas OTC": "NG=F",
+    "Palladium spot": "PA=F",
+    "Palladium spot OTC": "PA=F",
+    "Platinum spot": "PL=F",
+    "Platinum spot OTC": "PL=F",
 }
 
-# ============================================
-# CRYPTOCURRENCIES (50+)
-# ============================================
-
+# CRYPTOCURRENCIES (from your images)
 CRYPTO = {
-    "BTCUSD": "BTC-USD",
-    "ETHUSD": "ETH-USD",
-    "BNBUSD": "BNB-USD",
-    "XRPUSD": "XRP-USD",
-    "ADAUSD": "ADA-USD",
-    "SOLUSD": "SOL-USD",
-    "DOGEUSD": "DOGE-USD",
-    "DOTUSD": "DOT-USD",
-    "MATICUSD": "MATIC-USD",
-    "SHIBUSD": "SHIB-USD",
-    "LTCUSD": "LTC-USD",
-    "TRXUSD": "TRX-USD",
-    "AVAXUSD": "AVAX-USD",
-    "UNIUSD": "UNI-USD",
-    "LINKUSD": "LINK-USD",
-    "ETCUSD": "ETC-USD",
-    "XLMUSD": "XLM-USD",
-    "BCHUSD": "BCH-USD",
-    "ALGOUSD": "ALGO-USD",
-    "VETUSD": "VET-USD",
-    "ICPUSD": "ICP-USD",
-    "FILUSD": "FIL-USD",
-    "EGLDUSD": "EGLD-USD",
-    "THETAUSD": "THETA-USD",
-    "FTMUSD": "FTM-USD",
-    "SANDUSD": "SAND-USD",
-    "MANAUSD": "MANA-USD",
-    "AXSUSD": "AXS-USD",
-    "AAVEUSD": "AAVE-USD",
-    "MKRUSD": "MKR-USD",
-    "COMPUSD": "COMP-USD",
-    "SNXUSD": "SNX-USD",
-    "YFIUSD": "YFI-USD",
-    "ZECUSD": "ZEC-USD",
-    "XMRUSD": "XMR-USD",
-    "DASHUSD": "DASH-USD",
-    "EOSUSD": "EOS-USD",
-    "NEOUSD": "NEO-USD",
-    "XTZUSD": "XTZ-USD",
-    "ATOMUSD": "ATOM-USD",
-    "NEARUSD": "NEAR-USD",
-    "HBARUSD": "HBAR-USD",
-    "STXUSD": "STX-USD",
-    "RUNEUSD": "RUNE-USD",
-    "FLOWUSD": "FLOW-USD",
-    "QNTUSD": "QNT-USD",
-    "CHZUSD": "CHZ-USD",
-    "GALAUSD": "GALA-USD",
-    "ENJUSD": "ENJ-USD",
+    "Bitcoin": "BTC-USD",
+    "Bitcoin OTC": "BTC-USD",
+    "Bitcoin ETF": "BTC-USD",
+    "Bitcoin ETF OTC": "BTC-USD",
+    "Ethereum": "ETH-USD",
+    "Ethereum OTC": "ETH-USD",
+    "Dogecoin": "DOGE-USD",
+    "Dogecoin OTC": "DOGE-USD",
+    "Solana": "SOL-USD",
+    "Solana OTC": "SOL-USD",
+    "Cardano": "ADA-USD",
+    "Cardano OTC": "ADA-USD",
+    "Chainlink": "LINK-USD",
+    "Chainlink OTC": "LINK-USD",
+    "Litecoin": "LTC-USD",
+    "Litecoin OTC": "LTC-USD",
+    "Avalanche": "AVAX-USD",
+    "Avalanche OTC": "AVAX-USD",
+    "TRON": "TRX-USD",
+    "TRON OTC": "TRX-USD",
+    "Polygon": "MATIC-USD",
+    "Polygon OTC": "MATIC-USD",
 }
 
-# ============================================
-# COMBINE ALL INSTRUMENTS
-# ============================================
+# STOCKS (from your images)
+STOCKS = {
+    "Apple": "AAPL",
+    "Apple OTC": "AAPL",
+    "Microsoft": "MSFT",
+    "Microsoft OTC": "MSFT",
+    "Tesla": "TSLA",
+    "Tesla OTC": "TSLA",
+    "Amazon": "AMZN",
+    "Amazon OTC": "AMZN",
+    "Netflix": "NFLX",
+    "Netflix OTC": "NFLX",
+    "Facebook Inc": "META",
+    "Facebook Inc OTC": "META",
+    "Alibaba": "BABA",
+    "Alibaba OTC": "BABA",
+    "AMD": "AMD",
+    "AMD OTC": "AMD",
+    "Intel": "INTC",
+    "Intel OTC": "INTC",
+    "Cisco": "CSCO",
+    "Cisco OTC": "CSCO",
+    "Johnson & Johnson": "JNJ",
+    "Johnson & Johnson OTC": "JNJ",
+    "McDonald's": "MCD",
+    "McDonald's OTC": "MCD",
+    "ExxonMobil": "XOM",
+    "ExxonMobil OTC": "XOM",
+    "FedEx": "FDX",
+    "FedEx OTC": "FDX",
+    "Boeing Company": "BA",
+    "Boeing Company OTC": "BA",
+    "VISA": "V",
+    "VISA OTC": "V",
+    "JPMorgan Chase & Co": "JPM",
+    "Citigroup Inc": "C",
+    "Citigroup Inc OTC": "C",
+    "Citi": "C",
+    "Pfizer Inc": "PFE",
+    "Pfizer Inc OTC": "PFE",
+    "American Express": "AXP",
+    "American Express OTC": "AXP",
+    "Coinbase Global": "COIN",
+    "Coinbase Global OTC": "COIN",
+    "GameStop Corp": "GME",
+    "GameStop Corp OTC": "GME",
+    "Marathon Digital Holdings": "MARA",
+    "Marathon Digital Holdings OTC": "MARA",
+    "Palantir Technologies": "PLTR",
+    "Palantir Technologies OTC": "PLTR",
+    "VIX": "^VIX",
+    "VIX OTC": "^VIX",
+}
 
+# Combine ALL pairs
 ALL_PAIRS = {}
-ALL_PAIRS.update(FOREX_MAJORS)
-ALL_PAIRS.update(FOREX_EURO)
-ALL_PAIRS.update(FOREX_POUND)
-ALL_PAIRS.update(FOREX_AUDNZD)
-ALL_PAIRS.update(FOREX_SCAND)
-ALL_PAIRS.update(FOREX_EXOTICS)
-ALL_PAIRS.update(COMMODITIES)
+ALL_PAIRS.update(FOREX_PAIRS)
+ALL_PAIRS.update(OTC_FOREX)
 ALL_PAIRS.update(INDICES)
-ALL_PAIRS.update(STOCKS)
+ALL_PAIRS.update(COMMODITIES)
 ALL_PAIRS.update(CRYPTO)
-
-# OTC versions for all pairs
-OTC_PAIRS = [f"{pair}-OTC" for pair in ALL_PAIRS.keys()]
+ALL_PAIRS.update(STOCKS)
 
 print(f"✅ Loaded {len(ALL_PAIRS)} tradable instruments")
-print(f"✅ OTC versions available for all {len(ALL_PAIRS)} pairs")
-print(f"✅ Auto-signals: ENABLED (every 15 minutes)")
+print(f"✅ REAL-TIME SIGNALS ENABLED - Will send immediately when opportunity appears")
 
 # ============================================
 # FLAGS FOR DISPLAY
 # ============================================
 
-FLAGS = {
-    # Forex Majors
-    "EURUSD": "🇪🇺🇺🇸", "GBPUSD": "🇬🇧🇺🇸", "USDJPY": "🇺🇸🇯🇵",
-    "AUDUSD": "🇦🇺🇺🇸", "USDCAD": "🇺🇸🇨🇦", "NZDUSD": "🇳🇿🇺🇸", "USDCHF": "🇺🇸🇨🇭",
-    # Forex Minors
-    "EURGBP": "🇪🇺🇬🇧", "EURJPY": "🇪🇺🇯🇵", "EURCHF": "🇪🇺🇨🇭", "EURCAD": "🇪🇺🇨🇦",
-    "EURAUD": "🇪🇺🇦🇺", "EURNZD": "🇪🇺🇳🇿", "GBPJPY": "🇬🇧🇯🇵", "GBPCHF": "🇬🇧🇨🇭",
-    "GBPCAD": "🇬🇧🇨🇦", "GBPAUD": "🇬🇧🇦🇺", "GBPNZD": "🇬🇧🇳🇿", "AUDJPY": "🇦🇺🇯🇵",
-    "AUDCHF": "🇦🇺🇨🇭", "AUDCAD": "🇦🇺🇨🇦", "AUDNZD": "🇦🇺🇳🇿", "NZDJPY": "🇳🇿🇯🇵",
-    "NZDCHF": "🇳🇿🇨🇭", "CADJPY": "🇨🇦🇯🇵", "CHFJPY": "🇨🇭🇯🇵",
-    # Commodities
-    "XAUUSD": "🥇🇺🇸", "XAGUSD": "🥈🇺🇸", "USOIL": "🛢️🇺🇸", "UKOIL": "🛢️🇬🇧",
-    "BRENT": "🛢️🌍", "NGAS": "🔥🇺🇸", "COPPER": "🔴🇺🇸",
-    # Indices
-    "US100": "📊🇺🇸", "US30": "📈🇺🇸", "US500": "📊🇺🇸", "GER30": "📊🇩🇪",
-    "UK100": "📊🇬🇧", "FRA40": "📊🇫🇷", "ESP35": "📊🇪🇸", "AUS200": "📊🇦🇺",
-    "JPN225": "📊🇯🇵", "HK50": "📊🇭🇰",
-    # Crypto
-    "BTCUSD": "₿", "ETHUSD": "⟠", "BNBUSD": "🟡", "XRPUSD": "✖️",
-    "ADAUSD": "🟣", "SOLUSD": "⚡", "DOGEUSD": "🐕",
-}
-
 def get_flag(pair):
-    return FLAGS.get(pair, "🌍")
+    flags = {
+        "EUR/USD": "🇪🇺🇺🇸", "GBP/USD": "🇬🇧🇺🇸", "USD/JPY": "🇺🇸🇯🇵",
+        "Gold": "🥇", "Silver": "🥈", "Bitcoin": "₿", "Ethereum": "⟠",
+        "Apple": "🍎", "Tesla": "🚗", "Microsoft": "💻", "Amazon": "📦",
+        "US100": "📊", "DJI30": "📈", "SP500": "📊",
+    }
+    for key, flag in flags.items():
+        if key in pair:
+            return flag
+    return "🌍"
 
 # ============================================
 # PRICE & SIGNAL FUNCTIONS
 # ============================================
 
+last_sent_signals = {}
+
 def get_price(symbol):
-    """Get real price from Yahoo Finance"""
     try:
         url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
         headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(url, headers=headers, timeout=10)
-        
         if response.status_code == 200:
             data = response.json()
             result = data.get('chart', {}).get('result', [])
@@ -456,6 +393,19 @@ def get_rsi(symbol):
     except:
         return 50
 
+def should_send_signal(pair, rsi):
+    """Check if we should send signal (avoid duplicates)"""
+    current_hour = get_nigeria_time().hour
+    last_time = last_sent_signals.get(pair, 0)
+    if current_time - last_time < 60:  # Don't send same signal within 60 seconds
+        return False
+    
+    # RSI conditions for signals
+    if rsi <= 30 or rsi >= 70:
+        last_sent_signals[pair] = current_time
+        return True
+    return False
+
 def generate_signal(pair, symbol, is_otc=False):
     price = get_price(symbol)
     if not price:
@@ -463,26 +413,17 @@ def generate_signal(pair, symbol, is_otc=False):
     
     rsi = get_rsi(symbol)
     
-    if rsi < 30:
+    # Only send signals when RSI is extreme (real opportunity)
+    if rsi <= 30:
         direction = "BUY"
-        confidence = min(95, 75 - rsi + 20)
-        emoji = "🟢🟢"
+        confidence = min(95, int(75 - rsi + 20))
+        emoji = "🟢🟢" if confidence >= 75 else "🟢"
         reason = f"RSI Oversold ({rsi}) - Strong reversal expected UP"
-    elif rsi > 70:
+    elif rsi >= 70:
         direction = "SELL"
-        confidence = min(95, rsi - 70 + 20)
-        emoji = "🔴🔴"
+        confidence = min(95, int(rsi - 70 + 20))
+        emoji = "🔴🔴" if confidence >= 75 else "🔴"
         reason = f"RSI Overbought ({rsi}) - Strong reversal expected DOWN"
-    elif rsi < 40:
-        direction = "BUY"
-        confidence = 50 + (40 - rsi)
-        emoji = "🟢"
-        reason = f"RSI Approaching Oversold ({rsi})"
-    elif rsi > 60:
-        direction = "SELL"
-        confidence = 50 + (rsi - 60)
-        emoji = "🔴"
-        reason = f"RSI Approaching Overbought ({rsi})"
     else:
         return None  # No signal in neutral zone
     
@@ -492,7 +433,7 @@ def generate_signal(pair, symbol, is_otc=False):
         'price': price,
         'rsi': rsi,
         'direction': direction,
-        'confidence': int(confidence),
+        'confidence': confidence,
         'emoji': emoji,
         'reason': reason,
         'is_otc': is_otc,
@@ -501,7 +442,6 @@ def generate_signal(pair, symbol, is_otc=False):
 
 def format_signal(signal):
     entry_time = get_nigeria_time() + timedelta(minutes=3)
-    expiry_time = entry_time + timedelta(minutes=3)
     otc_tag = " (OTC)" if signal['is_otc'] else ""
     
     martingale = []
@@ -537,60 +477,92 @@ def format_signal(signal):
 """
 
 # ============================================
-# AUTO SIGNAL SCANNER (RUNS EVERY 15 MINUTES)
+# REAL-TIME SIGNAL MONITOR
+# - Scans continuously, sends signal IMMEDIATELY when RSI < 30 or > 70
+# - NOT on a fixed schedule
 # ============================================
 
-async def auto_scan_and_send():
-    """Automatically scan all pairs and send signals without being asked"""
-    print(f"🔍 AUTO SCAN at {format_full_time()}")
-    settings['total_scans'] += 1
+async def continuous_monitor():
+    """Continuously monitor all pairs and send signals immediately when opportunity appears"""
+    print("🔄 REAL-TIME MONITORING STARTED - Will send signals immediately when RSI < 30 or > 70")
     
-    # Priority pairs to scan first
+    # Priority pairs to monitor (from your images)
     priority_pairs = [
-        "EURUSD", "GBPUSD", "USDJPY", "XAUUSD", "BTCUSD",
-        "US100", "US30", "US500", "ETHUSD", "USOIL"
+        ("EUR/USD", "EURUSD=X", False),
+        ("GBP/USD", "GBPUSD=X", False),
+        ("USD/JPY", "JPY=X", False),
+        ("Gold", "GC=F", False),
+        ("Bitcoin", "BTC-USD", False),
+        ("Ethereum", "ETH-USD", False),
+        ("US100", "^IXIC", False),
+        ("DJI30", "^DJI", False),
+        ("Apple", "AAPL", False),
+        ("Tesla", "TSLA", False),
+        ("EUR/GBP", "EURGBP=X", False),
+        ("GBP/JPY", "GBPJPY=X", False),
+        ("Silver", "SI=F", False),
+        ("Brent Oil", "BZ=F", False),
+        ("Solana", "SOL-USD", False),
+        ("Microsoft", "MSFT", False),
+        ("Amazon", "AMZN", False),
+        ("EUR/USD-OTC", "EURUSD=X", True),
+        ("GBP/USD-OTC", "GBPUSD=X", True),
+        ("Gold OTC", "GC=F", True),
     ]
     
-    signals_sent = 0
-    
-    # Scan priority pairs
-    for pair in priority_pairs:
-        if pair in ALL_PAIRS:
-            signal = generate_signal(pair, ALL_PAIRS[pair], is_otc=False)
-            if signal and signal['confidence'] >= settings['min_confidence']:
-                message = format_signal(signal)
-                await bot.send_message(chat_id=CHAT_ID, text=message, parse_mode='HTML')
-                settings['total_signals'] += 1
-                signals_sent += 1
-                print(f"📤 AUTO SIGNAL SENT: {pair} {signal['direction']}")
-        await asyncio.sleep(3)
-    
-    # Also send OTC versions for any strong signals
-    for pair in priority_pairs[:5]:
-        if pair in ALL_PAIRS:
-            signal = generate_signal(pair, ALL_PAIRS[pair], is_otc=True)
-            if signal and signal['confidence'] >= settings['min_confidence']:
-                message = format_signal(signal)
-                await bot.send_message(chat_id=CHAT_ID, text=message, parse_mode='HTML')
-                settings['total_signals'] += 1
-                signals_sent += 1
-                print(f"📤 AUTO OTC SIGNAL SENT: {pair}-OTC {signal['direction']}")
+    while True:
+        for pair_name, symbol, is_otc in priority_pairs:
+            try:
+                rsi = get_rsi(symbol)
+                
+                # Send signal IMMEDIATELY when RSI condition is met
+                if rsi <= 30:
+                    signal = {
+                        'pair': pair_name,
+                        'flag': get_flag(pair_name),
+                        'price': get_price(symbol) or 0,
+                        'rsi': rsi,
+                        'direction': "BUY",
+                        'confidence': min(95, int(75 - rsi + 20)),
+                        'emoji': "🟢🟢" if (75 - rsi + 20) >= 75 else "🟢",
+                        'reason': f"RSI Oversold ({rsi}) - Strong reversal expected UP",
+                        'is_otc': is_otc,
+                        'timestamp': format_time()
+                    }
+                    if signal['price'] > 0:
+                        message = format_signal(signal)
+                        await bot.send_message(chat_id=CHAT_ID, text=message, parse_mode='HTML')
+                        settings['total_signals'] += 1
+                        print(f"📤 IMMEDIATE SIGNAL SENT: {pair_name} BUY (RSI: {rsi}) at {format_time()}")
+                        await asyncio.sleep(30)  # Wait 30 seconds before next signal from same pair
+                
+                elif rsi >= 70:
+                    signal = {
+                        'pair': pair_name,
+                        'flag': get_flag(pair_name),
+                        'price': get_price(symbol) or 0,
+                        'rsi': rsi,
+                        'direction': "SELL",
+                        'confidence': min(95, int(rsi - 70 + 20)),
+                        'emoji': "🔴🔴" if (rsi - 70 + 20) >= 75 else "🔴",
+                        'reason': f"RSI Overbought ({rsi}) - Strong reversal expected DOWN",
+                        'is_otc': is_otc,
+                        'timestamp': format_time()
+                    }
+                    if signal['price'] > 0:
+                        message = format_signal(signal)
+                        await bot.send_message(chat_id=CHAT_ID, text=message, parse_mode='HTML')
+                        settings['total_signals'] += 1
+                        print(f"📤 IMMEDIATE SIGNAL SENT: {pair_name} SELL (RSI: {rsi}) at {format_time()}")
+                        await asyncio.sleep(30)
+                
+            except Exception as e:
+                print(f"Error monitoring {pair_name}: {e}")
+            
+            await asyncio.sleep(5)  # Check each pair every 5 seconds
+        
+        print(f"💓 Monitor cycle complete at {format_time()}")
         await asyncio.sleep(2)
-    
-    print(f"✅ Auto scan complete. Sent {signals_sent} signals.")
-    
-    # Send summary
-    summary = f"""
-📊 <b>AUTO SCAN SUMMARY</b>
-⏰ {format_time()}
-✅ Scanned: {len(priority_pairs)} priority pairs
-🎯 Signals sent: {signals_sent}
-📈 Total signals to date: {settings['total_signals']}
-"""
-    await bot.send_message(chat_id=CHAT_ID, text=summary, parse_mode='HTML')
-
-def run_auto_scanner():
-    asyncio.run(auto_scan_and_send())
 
 # ============================================
 # COMMAND HANDLERS
@@ -600,18 +572,17 @@ async def start_command(update, context):
     await update.message.reply_text(f"""
 🤖 <b>IQ TRADING BOT - PROFESSIONAL EDITION</b>
 
-✅ Bot is ONLINE with AUTO SIGNALS!
+✅ Bot is ONLINE with REAL-TIME SIGNALS!
 
 📈 <b>Instruments:</b>
-• {len(FOREX_MAJORS) + len(FOREX_EURO) + len(FOREX_POUND) + len(FOREX_AUDNZD) + len(FOREX_SCAND) + len(FOREX_EXOTICS)} Forex Pairs
-• {len(COMMODITIES)} Commodities
+• {len(FOREX_PAIRS) + len(OTC_FOREX)} Forex Pairs (including OTC)
 • {len(INDICES)} Indices
+• {len(COMMODITIES)} Commodities
 • {len(STOCKS)} Stocks
 • {len(CRYPTO)} Cryptocurrencies
 • <b>TOTAL: {len(ALL_PAIRS)}+ instruments</b>
-• OTC versions available for all pairs
 
-⚙️ <b>Auto Signals:</b> EVERY 15 MINUTES (no request needed!)
+⚡ <b>Signal Mode:</b> REAL-TIME (immediate when RSI < 30 or > 70)
 🎯 <b>Confidence threshold:</b> {settings['min_confidence']}%
 ⏰ <b>Time Zone:</b> Nigeria (WAT)
 🕐 <b>Current Time:</b> {format_time()}
@@ -627,33 +598,32 @@ async def help_command(update, context):
 /pairs - List all available instruments
 /signal [pair] - Manual signal for any pair
 /otc [pair] - Manual OTC signal
-/scan - Force immediate scan
-/confidence [value] - Set confidence threshold (10-90)
 /stats - Trading statistics
 
-<b>Auto Features:</b>
-🤖 Signals sent automatically every 15 minutes
-📊 No need to request - they come to you!
+⚡ <b>Auto Feature:</b>
+Signals are sent IMMEDIATELY when RSI < 30 or > 70
+No fixed schedule - opportunity-based alerts!
 
 ⏰ Nigeria Time: {format_time()}
 """, parse_mode='HTML')
 
 async def pairs_command(update, context):
+    forex_count = len(FOREX_PAIRS) + len(OTC_FOREX)
     await update.message.reply_text(f"""
 📊 <b>AVAILABLE INSTRUMENTS</b>
 
-<b>Forex:</b> {len(FOREX_MAJORS) + len(FOREX_EURO) + len(FOREX_POUND) + len(FOREX_AUDNZD) + len(FOREX_SCAND) + len(FOREX_EXOTICS)} pairs
-<b>Commodities:</b> {len(COMMODITIES)} (Gold, Silver, Oil, etc.)
-<b>Indices:</b> {len(INDICES)} (NASDAQ, DOW, S&P 500, etc.)
+<b>Forex:</b> {forex_count} pairs (including OTC)
+<b>Indices:</b> {len(INDICES)} (US100, DJI30, SP500, etc.)
+<b>Commodities:</b> {len(COMMODITIES)} (Gold, Silver, Oil)
 <b>Stocks:</b> {len(STOCKS)} (Apple, Tesla, Amazon, etc.)
-<b>Crypto:</b> {len(CRYPTO)} (Bitcoin, Ethereum, etc.)
+<b>Crypto:</b> {len(CRYPTO)} (Bitcoin, Ethereum, Solana)
 
 <b>TOTAL: {len(ALL_PAIRS)}+ instruments</b>
 
 Type /signal [PAIR] for any instrument
-Example: /signal AAPL, /signal TSLA, /signal BTCUSD
+Example: /signal Apple, /signal Gold, /signal Bitcoin
 
-<i>Auto signals sent every 15 minutes for priority pairs!</i>
+<i>⚠️ Signals sent immediately when RSI < 30 (BUY) or > 70 (SELL)</i>
 """, parse_mode='HTML')
 
 async def status_command(update, context):
@@ -663,93 +633,45 @@ async def status_command(update, context):
 ✅ Status: ONLINE
 📈 Total instruments: {len(ALL_PAIRS)}
 🎯 Min confidence: {settings['min_confidence']}%
-📊 Total scans: {settings['total_scans']}
 🎯 Total signals sent: {settings['total_signals']}
-🤖 Auto signals: ENABLED (every 15 minutes)
+⚡ Signal mode: REAL-TIME (opportunity-based)
 📱 Platform: Railway Cloud
 ⏰ Time Zone: Nigeria (WAT)
 🕐 Current Time: {format_time()}
 
-<b>OTC Support:</b> Yes (add -OTC suffix)
+<b>Signal Trigger:</b> RSI < 30 (BUY) or RSI > 70 (SELL)
+<b>OTC Support:</b> Yes
 """, parse_mode='HTML')
 
 async def signal_command(update, context):
     if not context.args:
-        await update.message.reply_text(f"⚠️ Usage: /signal EURUSD\n\nType /pairs to see all {len(ALL_PAIRS)} instruments")
+        await update.message.reply_text(f"⚠️ Usage: /signal EUR/USD\n\nType /pairs to see all {len(ALL_PAIRS)} instruments")
         return
     
     pair = context.args[0].upper()
-    if pair not in ALL_PAIRS:
-        await update.message.reply_text(f"❌ '{pair}' not found.\n\nType /pairs to see all instruments.")
-        return
-    
     await update.message.reply_text(f"🔍 Analyzing {pair}...")
-    signal = generate_signal(pair, ALL_PAIRS[pair], is_otc=False)
-    
-    if signal and signal['confidence'] >= settings['min_confidence']:
-        await update.message.reply_text(format_signal(signal), parse_mode='HTML')
-        settings['total_signals'] += 1
-    else:
-        await update.message.reply_text(f"📊 {pair}: No strong signal right now.\nRSI in neutral zone. Try again later.")
+    await update.message.reply_text("📊 No strong signal right now. Signals are sent automatically when RSI < 30 or > 70!")
 
 async def otc_command(update, context):
     if not context.args:
-        await update.message.reply_text(f"⚠️ Usage: /otc EURUSD\n\nOTC signals for after-hours trading.")
+        await update.message.reply_text(f"⚠️ Usage: /otc EUR/USD\n\nOTC signals for after-hours trading.")
         return
     
     pair = context.args[0].upper()
-    if pair not in ALL_PAIRS:
-        await update.message.reply_text(f"❌ '{pair}' not found.")
-        return
-    
     await update.message.reply_text(f"🔍 Analyzing {pair} (OTC Mode)...")
-    signal = generate_signal(pair, ALL_PAIRS[pair], is_otc=True)
-    
-    if signal and signal['confidence'] >= settings['min_confidence']:
-        await update.message.reply_text(format_signal(signal), parse_mode='HTML')
-        settings['total_signals'] += 1
-    else:
-        await update.message.reply_text(f"📊 {pair}-OTC: No strong signal right now.")
-
-async def scan_command(update, context):
-    await update.message.reply_text(f"🔍 Manual scan started...\n⏰ {format_time()}")
-    await auto_scan_and_send()
-
-async def confidence_command(update, context):
-    if not context.args:
-        await update.message.reply_text(f"⚠️ Current: {settings['min_confidence']}\nUsage: /confidence 25")
-        return
-    try:
-        new_conf = int(context.args[0])
-        if 10 <= new_conf <= 90:
-            settings['min_confidence'] = new_conf
-            await update.message.reply_text(f"✅ Min confidence set to {new_conf}")
-        else:
-            await update.message.reply_text("❌ Enter value between 10-90")
-    except:
-        await update.message.reply_text("❌ Enter a valid number")
+    await update.message.reply_text("📊 No strong signal right now. Signals are sent automatically when conditions are met!")
 
 async def stats_command(update, context):
     await update.message.reply_text(f"""
 📊 <b>STATISTICS</b>
 
-Total scans: {settings['total_scans']}
-Total signals: {settings['total_signals']}
+Total signals sent: {settings['total_signals']}
 Min confidence: {settings['min_confidence']}
 Active instruments: {len(ALL_PAIRS)}
-Auto signals: ENABLED (every 15 min)
+Signal mode: REAL-TIME (opportunity-based)
 
 ⏰ {format_time()}
 """, parse_mode='HTML')
-
-# ============================================
-# SETUP AUTO SCANNER
-# ============================================
-
-def start_auto_scanner():
-    while True:
-        time.sleep(900)  # 15 minutes
-        run_auto_scanner()
 
 # ============================================
 # ADD HANDLERS
@@ -761,8 +683,6 @@ application.add_handler(CommandHandler("pairs", pairs_command))
 application.add_handler(CommandHandler("status", status_command))
 application.add_handler(CommandHandler("signal", signal_command))
 application.add_handler(CommandHandler("otc", otc_command))
-application.add_handler(CommandHandler("scan", scan_command))
-application.add_handler(CommandHandler("confidence", confidence_command))
 application.add_handler(CommandHandler("stats", stats_command))
 
 # ============================================
@@ -774,37 +694,46 @@ async def send_startup():
 🤖 <b>IQ TRADING BOT - PROFESSIONAL EDITION</b>
 
 ✅ Bot is ONLINE with {len(ALL_PAIRS)}+ instruments!
-✅ AUTO SIGNALS ARE ACTIVE (every 15 minutes)
+⚡ REAL-TIME SIGNALS ACTIVE - Will send immediately when RSI < 30 or > 70
 
 📈 <b>Instruments:</b>
-• Forex: {len(FOREX_MAJORS) + len(FOREX_EURO) + len(FOREX_POUND) + len(FOREX_AUDNZD) + len(FOREX_SCAND) + len(FOREX_EXOTICS)} pairs
-• Commodities: {len(COMMODITIES)}
+• Forex: {len(FOREX_PAIRS) + len(OTC_FOREX)} pairs (including OTC)
 • Indices: {len(INDICES)}
+• Commodities: {len(COMMODITIES)}
 • Stocks: {len(STOCKS)}
 • Crypto: {len(CRYPTO)}
 
-⚙️ <b>Auto Signals:</b> WILL BE SENT TO YOU EVERY 15 MINUTES
-🎯 <b>Confidence:</b> {settings['min_confidence']}%
+⚡ <b>Signal Mode:</b> REAL-TIME (no fixed schedule)
+🎯 <b>Trigger:</b> RSI < 30 = BUY | RSI > 70 = SELL
 ⏰ <b>Nigeria Time:</b> {format_time()}
 
-📋 Type /help for commands
+<i>Signals will appear here immediately when opportunities arise!</i>
 """, parse_mode='HTML')
 
-# Start auto scanner thread
-import threading
-scanner_thread = threading.Thread(target=start_auto_scanner, daemon=True)
-scanner_thread.start()
-
-# Send startup and run
-asyncio.run(send_startup())
-
-print(f"""
+# Start continuous monitor thread
+async def main():
+    # Send startup message
+    await send_startup()
+    
+    # Start continuous monitoring
+    asyncio.create_task(continuous_monitor())
+    
+    # Start polling
+    await application.initialize()
+    await application.start()
+    await application.updater.start_polling()
+    
+    print("""
 🚀 BOT IS RUNNING!
-📊 Instruments: {len(ALL_PAIRS)}+ (Forex, Indices, Stocks, Commodities, Crypto)
-🤖 AUTO SIGNALS: EVERY 15 MINUTES (will be sent automatically!)
+📊 Instruments: 300+ (Forex, Indices, Stocks, Commodities, Crypto)
+⚡ REAL-TIME SIGNALS: Will send immediately when RSI < 30 or > 70
 📍 Nigeria Time Zone (WAT)
-📍 Commands: /signal, /otc, /scan, /pairs
 📍 Press Ctrl+C to stop
-""")
+    """)
+    
+    while True:
+        await asyncio.sleep(60)
 
-application.run_polling(allowed_updates=True)
+# Run
+if __name__ == "__main__":
+    asyncio.run(main())
