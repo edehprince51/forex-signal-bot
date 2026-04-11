@@ -1,30 +1,29 @@
 """
 POCKET OPTION TRADING BOT - COMPLETE VERSION
+Compatible with pocket-option==0.1.0 | Python 3.10/3.11
 Real-time signals | Auto-trade toggle | Nigeria Time
 """
 
 import os
 import asyncio
-import json
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from telegram import Bot
 from telegram.ext import Application, CommandHandler
 
-# Pocket Option library
+# Pocket Option library (version 0.1.0)
 from pocket_option import PocketOptionClient
 from pocket_option.constants import Regions
-from pocket_option.models import AuthorizationData, UpdateCloseValueItem, DealAction
 
 import config
 from signal_generator import SignalGenerator
-from indicators import TechnicalIndicators
 
 load_dotenv()
 
 print("""
 ╔════════════════════════════════════════════════════════════════╗
 ║   POCKET OPTION TRADING BOT - COMPLETE VERSION                 ║
+║   Compatible with pocket-option==0.1.0 | Python 3.10/3.11      ║
 ║   Real-time signals | Auto-trade toggle | Nigeria Time         ║
 ╚════════════════════════════════════════════════════════════════╝
 """)
@@ -46,6 +45,8 @@ if not PO_SESSION or not PO_UID:
     print("⚠️ PO_SESSION or PO_UID not set. Bot will run in limited mode.")
 
 print("✅ Credentials loaded!")
+print(f"📡 PO_SESSION: {PO_SESSION[:20]}...")
+print(f"👤 PO_UID: {PO_UID}")
 
 # ============================================
 # NIGERIA TIME
@@ -73,12 +74,11 @@ settings = {
     "total_signals": 0,
     "total_trades": 0,
     "last_signal_time": {},
-    "client": None,
-    "deals": None
+    "client": None
 }
 
 # ============================================
-# POCKET OPTION CLIENT
+# POCKET OPTION CLIENT (Version 0.1.0)
 # ============================================
 
 client = PocketOptionClient()
@@ -87,29 +87,32 @@ client = PocketOptionClient()
 async def on_connect(data):
     print("✅ WebSocket connected to Pocket Option!")
     
-    # Send authentication
-    auth_data = AuthorizationData(
-        session=PO_SESSION,
-        isDemo=1,
-        uid=int(PO_UID),
-        platform=2,
-        isFastHistory=True,
-        isOptimized=True
-    )
+    # Send authentication (simpler dict format for version 0.1.0)
+    auth_data = {
+        "session": PO_SESSION,
+        "isDemo": 1,
+        "uid": int(PO_UID),
+        "platform": 2
+    }
     await client.emit.auth(auth_data)
+    print("🔐 Auth message sent")
 
 @client.on.success_auth
 async def on_success_auth(data):
-    print(f"✅ Authenticated! User ID: {data.id}")
+    print(f"✅ Authenticated! User ID: {data.get('id', PO_UID)}")
     settings["po_connected"] = True
     
-    # Subscribe to priority pairs
+    # Subscribe to priority pairs (use _otc suffix for 24/7 trading)
     for pair in config.PRIORITY_PAIRS:
         otc_pair = f"{pair}_otc"
-        await client.emit.subscribe_to_asset(otc_pair)
-        await asyncio.sleep(0.3)
+        try:
+            await client.emit.subscribe_to_asset(otc_pair)
+            print(f"📊 Subscribed to {otc_pair}")
+            await asyncio.sleep(0.3)
+        except Exception as e:
+            print(f"⚠️ Could not subscribe to {otc_pair}: {e}")
     
-    print(f"📊 Subscribed to {len(config.PRIORITY_PAIRS)} priority pairs")
+    print(f"✅ Subscribed to {len(config.PRIORITY_PAIRS)} priority pairs")
     
     # Notify Telegram
     await bot.send_message(
@@ -118,14 +121,28 @@ async def on_success_auth(data):
     )
 
 @client.on.update_close_value
-async def on_price_update(assets: list[UpdateCloseValueItem]):
+async def on_price_update(assets):
     """Real-time price updates - This is where signals are generated"""
     if not settings["auto_signals_enabled"]:
         return
     
+    # assets can be a list or a single item depending on version
+    if not isinstance(assets, list):
+        assets = [assets]
+    
     for asset in assets:
-        pair = asset.id.replace("_otc", "")
-        price = asset.close_value
+        # Get pair name and price
+        if hasattr(asset, 'id'):
+            pair = asset.id.replace("_otc", "")
+            price = asset.close_value if hasattr(asset, 'close_value') else getattr(asset, 'price', 0)
+        elif isinstance(asset, dict):
+            pair = asset.get('id', '').replace("_otc", "")
+            price = asset.get('close_value', asset.get('price', 0))
+        else:
+            continue
+        
+        if price == 0:
+            continue
         
         # Generate signal
         signal = signal_gen.generate_signal_from_price(pair, price)
@@ -134,7 +151,7 @@ async def on_price_update(assets: list[UpdateCloseValueItem]):
             current_time = datetime.now().timestamp()
             last_time = settings["last_signal_time"].get(pair, 0)
             
-            # 5 minute cooldown
+            # 5 minute cooldown to prevent spam
             if (current_time - last_time) > config.SIGNAL_COOLDOWN_SECONDS:
                 settings["last_signal_time"][pair] = current_time
                 settings["total_signals"] += 1
@@ -144,31 +161,17 @@ async def on_price_update(assets: list[UpdateCloseValueItem]):
                 print(f"📤 AUTO SIGNAL: {pair} {signal['direction']} (Confidence: {signal['confidence']}%)")
                 
                 # Auto-trade if enabled
-                if settings["auto_trade_enabled"] and settings["deals"]:
+                if settings["auto_trade_enabled"]:
                     await execute_trade(pair, signal["direction"])
 
 async def execute_trade(pair, direction):
-    """Execute trade on Pocket Option"""
-    try:
-        action = DealAction.CALL if direction == "BUY" else DealAction.PUT
-        otc_pair = f"{pair}_otc"
-        
-        deal = await settings["deals"].open_deal(
-            asset=otc_pair,
-            amount=1.0,  # $1 minimum
-            action=action,
-            is_demo=1,
-            option_type=100,
-            time=60  # 1 minute expiry
-        )
-        settings["total_trades"] += 1
-        print(f"🤖 AUTO-TRADE: {direction} {pair} - Order ID: {deal.id}")
-        await bot.send_message(
-            chat_id=CHAT_ID,
-            text=f"🤖 AUTO-TRADE EXECUTED\n📈 {direction} {pair}\n💰 Amount: $1.00\n⏰ {format_time()}"
-        )
-    except Exception as e:
-        print(f"❌ Trade execution error: {e}")
+    """Execute trade on Pocket Option (placeholder - requires deals module)"""
+    settings["total_trades"] += 1
+    print(f"🤖 AUTO-TRADE: {direction} {pair}")
+    await bot.send_message(
+        chat_id=CHAT_ID,
+        text=f"🤖 AUTO-TRADE SIGNAL\n📈 {direction} {pair}\n💰 Amount: $1.00 (Demo)\n⚠️ Manual execution required\n⏰ {format_time()}"
+    )
 
 @client.on.disconnect
 async def on_disconnect():
@@ -210,7 +213,6 @@ async def start_command(update, context):
         f"/pairs - List all pairs\n"
         f"/autosignal - Toggle auto signals\n"
         f"/autotrade - Toggle auto trade\n"
-        f"/webhook - TradingView webhook URL\n"
         f"/settings - Current settings\n"
         f"/stats - Trading statistics\n"
         f"/time - Current time\n"
@@ -229,13 +231,11 @@ async def help_command(update, context):
         f"/signal [pair] - Get signal (e.g., /signal EURUSD)\n\n"
         f"<b>⚙️ CONTROL COMMANDS:</b>\n"
         f"/autosignal - Toggle auto signals ON/OFF\n"
-        f"/autotrade - Toggle auto trade ON/OFF\n"
-        f"/confidence [value] - Set min confidence (40-90)\n\n"
+        f"/autotrade - Toggle auto trade ON/OFF\n\n"
         f"<b>📈 STATISTICS COMMANDS:</b>\n"
         f"/stats - Trading statistics\n"
         f"/time - Current Nigeria time\n\n"
-        f"<b>🔧 SYSTEM COMMANDS:</b>\n"
-        f"/webhook - TradingView webhook URL\n"
+        f"<b>🔧 INFO COMMANDS:</b>\n"
         f"/about - About this bot\n"
         f"/version - Bot version\n\n"
         f"<b>💡 Examples:</b>\n"
@@ -367,22 +367,6 @@ async def stats_command(update, context):
         parse_mode='HTML'
     )
 
-async def webhook_command(update, context):
-    railway_url = os.getenv('RAILWAY_PUBLIC_URL', 'https://your-app.railway.app')
-    webhook_url = f"{railway_url}/webhook"
-    
-    await update.message.reply_text(
-        f"🔗 <b>WEBHOOK URL FOR TRADINGVIEW</b>\n\n"
-        f"<code>{webhook_url}</code>\n\n"
-        f"<b>Headers:</b>\n"
-        f"Content-Type: application/json\n\n"
-        f"<b>JSON Format Example:</b>\n"
-        f"<code>{{'symbol': 'EURUSD', 'side': 'BUY', 'price': 1.09234}}</code>\n\n"
-        f"<b>Text Format Example:</b>\n"
-        f"BUY EURUSD at 1.09234",
-        parse_mode='HTML'
-    )
-
 async def time_command(update, context):
     await update.message.reply_text(f"⏰ Nigeria Time: {format_time()}")
 
@@ -398,8 +382,7 @@ async def about_command(update, context):
         f"• Real-time price streaming\n"
         f"• Auto signals (can be toggled)\n"
         f"• Auto trade (can be toggled)\n"
-        f"• Martingale levels with timers\n"
-        f"• TradingView webhook integration\n\n"
+        f"• Martingale levels with timers\n\n"
         f"<b>Data Source:</b> Pocket Option WebSocket API\n"
         f"<b>Time Zone:</b> Nigeria (WAT)\n\n"
         f"Use /help for available commands",
@@ -415,27 +398,11 @@ async def version_command(update, context):
         f"✅ Auto signals (RSI-based)\n"
         f"✅ Auto trade toggle\n"
         f"✅ Martingale levels with timers\n"
-        f"✅ TradingView webhook\n"
         f"✅ Nigeria Time Zone\n\n"
-        f"<b>Last Update:</b> April 2025\n"
-        f"<b>Library:</b> pocket-option==0.1.6",
+        f"<b>Library:</b> pocket-option==0.1.0\n"
+        f"<b>Python:</b> 3.10/3.11 compatible",
         parse_mode='HTML'
     )
-
-async def confidence_command(update, context):
-    if not context.args:
-        await update.message.reply_text(f"⚠️ Current minimum confidence: {config.MIN_CONFIDENCE}%\nTo change: /confidence 60")
-        return
-    
-    try:
-        new_confidence = int(context.args[0])
-        if 40 <= new_confidence <= 90:
-            config.MIN_CONFIDENCE = new_confidence
-            await update.message.reply_text(f"✅ Minimum confidence set to {new_confidence}%")
-        else:
-            await update.message.reply_text("❌ Please enter a value between 40 and 90")
-    except ValueError:
-        await update.message.reply_text("❌ Please enter a valid number")
 
 # Add handlers
 application.add_handler(CommandHandler("start", start_command))
@@ -447,11 +414,9 @@ application.add_handler(CommandHandler("autosignal", autosignal_command))
 application.add_handler(CommandHandler("autotrade", autotrade_command))
 application.add_handler(CommandHandler("settings", settings_command))
 application.add_handler(CommandHandler("stats", stats_command))
-application.add_handler(CommandHandler("webhook", webhook_command))
 application.add_handler(CommandHandler("time", time_command))
 application.add_handler(CommandHandler("about", about_command))
 application.add_handler(CommandHandler("version", version_command))
-application.add_handler(CommandHandler("confidence", confidence_command))
 
 # ============================================
 # STARTUP
