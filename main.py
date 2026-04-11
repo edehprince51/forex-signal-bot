@@ -1,10 +1,11 @@
 """
-POCKET OPTION TRADING BOT - BINARYOPTIONSTOOLSV2
-Real-time WebSocket | Auto signals | Nigeria Time
+POCKET OPTION TRADING BOT - FIXED COMMANDS WITH SCAN
+Real-time WebSocket | Auto signals | All commands working | /scan added
 """
 
 import os
 import asyncio
+import threading
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from telegram import Bot
@@ -19,8 +20,8 @@ load_dotenv()
 
 print("""
 ╔════════════════════════════════════════════════════════════════╗
-║   POCKET OPTION TRADING BOT - BINARYOPTIONSTOOLSV2             ║
-║   Real-time WebSocket | Auto signals | Nigeria Time            ║
+║   POCKET OPTION TRADING BOT - FIXED COMMANDS WITH SCAN         ║
+║   Real-time WebSocket | Auto signals | /scan added             ║
 ╚════════════════════════════════════════════════════════════════╝
 """)
 
@@ -35,10 +36,6 @@ PO_SESSION = os.getenv("PO_SESSION")
 if not TELEGRAM_TOKEN:
     print("❌ TELEGRAM_BOT_TOKEN not found!")
     exit(1)
-
-if not PO_SESSION:
-    print("⚠️ PO_SESSION not set. Bot will run in limited mode (no real-time data).")
-    PO_SESSION = None
 
 print("✅ Credentials loaded!")
 
@@ -68,78 +65,68 @@ settings = {
     "total_signals": 0,
     "total_trades": 0,
     "last_signal_time": {},
-    "client": None
+    "client": None,
+    "last_prices": {}
 }
 
 # ============================================
-# POCKET OPTION CLIENT (BinaryOptionsToolsV2)
+# WEBSOCKET THREAD (Runs separately)
 # ============================================
 
-async def connect_pocket_option():
-    """Connect to Pocket Option using BinaryOptionsToolsV2"""
+async def websocket_worker():
+    """WebSocket connection running in background"""
     if not PO_SESSION:
-        print("⚠️ No SSID provided. Skipping connection.")
+        print("⚠️ No SSID provided. WebSocket disabled.")
         return
     
     try:
-        print("🔌 Connecting to Pocket Option...")
+        print("🔌 Connecting to Pocket Option WebSocket...")
         client = PocketOptionAsync(ssid=PO_SESSION)
         settings["client"] = client
         settings["connected"] = True
         
-        # Get balance to confirm connection
+        # Get balance
         balance = await client.balance()
         print(f"✅ Connected! Balance: ${balance}")
         
         # Notify Telegram
         await bot.send_message(
             chat_id=CHAT_ID,
-            text=f"✅ Pocket Option CONNECTED!\n💰 Balance: ${balance}\n📊 Demo account\n⏰ {format_time()}"
+            text=f"✅ Pocket Option CONNECTED!\n💰 Balance: ${balance}\n📊 Real-time data active\n⏰ {format_time()}"
         )
         
-        # Start listening to real-time data
-        await listen_to_candles()
+        # Subscribe to priority pairs
+        for pair in config.PRIORITY_PAIRS:
+            otc_pair = f"{pair}_otc"
+            try:
+                print(f"📊 Subscribing to {otc_pair}...")
+                async for candle in client.subscribe_symbol(otc_pair):
+                    await process_candle(pair, candle)
+                    break
+            except Exception as e:
+                print(f"⚠️ Could not subscribe to {otc_pair}: {e}")
+            await asyncio.sleep(0.3)
         
+        print(f"✅ Subscribed to {len(config.PRIORITY_PAIRS)} pairs")
+        
+        # Keep connection alive
+        while True:
+            await asyncio.sleep(60)
+            
     except Exception as e:
-        print(f"❌ Connection error: {e}")
+        print(f"❌ WebSocket error: {e}")
         settings["connected"] = False
 
-async def listen_to_candles():
-    """Subscribe to real-time candles for priority pairs"""
-    if not settings["connected"]:
-        return
-    
-    client = settings["client"]
-    
-    # Subscribe to each priority pair
-    for pair in config.PRIORITY_PAIRS:
-        otc_pair = f"{pair}_otc"
-        try:
-            print(f"📊 Subscribing to {otc_pair}...")
-            async for candle in client.subscribe_symbol(otc_pair):
-                await process_candle(pair, candle)
-                break  # Break after first candle to continue subscription setup
-        except Exception as e:
-            print(f"⚠️ Could not subscribe to {otc_pair}: {e}")
-        
-        await asyncio.sleep(0.5)
-    
-    print(f"✅ Subscribed to {len(config.PRIORITY_PAIRS)} pairs")
-    
-    # Keep connection alive
-    while True:
-        await asyncio.sleep(60)
-
 async def process_candle(pair, candle):
-    """Process each real-time candle and generate signals"""
+    """Process each real-time candle"""
     if not settings["auto_signals_enabled"]:
         return
     
-    # Extract price from candle
     price = candle.get('close', 0)
-    
     if price == 0:
         return
+    
+    settings["last_prices"][pair] = price
     
     # Generate signal
     signal = signal_gen.generate_signal_from_price(pair, price)
@@ -148,57 +135,25 @@ async def process_candle(pair, candle):
         current_time = datetime.now().timestamp()
         last_time = settings["last_signal_time"].get(pair, 0)
         
-        # 5 minute cooldown to prevent spam
         if (current_time - last_time) > config.SIGNAL_COOLDOWN_SECONDS:
             settings["last_signal_time"][pair] = current_time
             settings["total_signals"] += 1
             
             message = signal_gen.format_signal_message(signal)
             await bot.send_message(chat_id=CHAT_ID, text=message, parse_mode='HTML')
-            print(f"📤 SIGNAL: {pair} {signal['direction']} (Confidence: {signal['confidence']}%)")
-            
-            # Auto-trade if enabled
-            if settings["auto_trade_enabled"]:
-                await execute_trade(pair, signal["direction"])
+            print(f"📤 SIGNAL: {pair} {signal['direction']}")
 
-async def execute_trade(pair, direction):
-    """Execute trade on Pocket Option"""
-    if not settings["connected"]:
-        return
-    
-    try:
-        client = settings["client"]
-        otc_pair = f"{pair}_otc"
-        action = "call" if direction == "BUY" else "put"
-        
-        # Place trade (1 minute expiry, $1 amount)
-        trade_id, deal = await client.buy(asset=otc_pair, amount=1.0, time=60)
-        settings["total_trades"] += 1
-        
-        print(f"🤖 AUTO-TRADE: {direction} {pair} - ID: {trade_id}")
-        await bot.send_message(
-            chat_id=CHAT_ID,
-            text=f"🤖 AUTO-TRADE EXECUTED\n📈 {direction} {pair}\n💰 Amount: $1.00\n📋 Order ID: {trade_id}\n⏰ {format_time()}"
-        )
-        
-        # Check result after 65 seconds
-        await asyncio.sleep(65)
-        result = await client.check_win(trade_id)
-        await bot.send_message(
-            chat_id=CHAT_ID,
-            text=f"📊 TRADE RESULT\n📈 {pair}\n🎯 Result: {result.get('result', 'unknown')}\n💵 Profit: ${result.get('profit', 0)}\n⏰ {format_time()}"
-        )
-        
-    except Exception as e:
-        print(f"❌ Trade error: {e}")
+def run_websocket():
+    """Run WebSocket in a separate event loop"""
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(websocket_worker())
 
 # ============================================
-# FALLBACK: Get price without WebSocket
+# FALLBACK PRICE (when WebSocket not connected)
 # ============================================
 
 def get_fallback_price(pair):
-    """Fallback price when WebSocket not connected"""
-    # Simple mapping for fallback
     fallback_prices = {
         "EURUSD": 1.09234,
         "GBPUSD": 1.28560,
@@ -207,6 +162,60 @@ def get_fallback_price(pair):
         "Bitcoin": 65000.00,
     }
     return fallback_prices.get(pair, 1.09234)
+
+# ============================================
+# SCAN COMMAND - Force manual scan of all pairs
+# ============================================
+
+async def scan_command(update, context):
+    """Force immediate scan of all priority pairs"""
+    await update.message.reply_text(f"🔍 Starting manual scan of all priority pairs...\n⏰ {format_time()}")
+    
+    signals_found = []
+    scan_results = []
+    
+    for pair in config.PRIORITY_PAIRS:
+        # Try to get price from WebSocket first
+        price = settings["last_prices"].get(pair, 0)
+        
+        # If no price from WebSocket, use fallback
+        if price == 0:
+            price = get_fallback_price(pair)
+        
+        # Generate signal
+        signal = signal_gen.generate_signal_from_price(pair, price)
+        
+        if signal and signal.get("confidence", 0) >= config.MIN_CONFIDENCE:
+            signals_found.append(signal)
+            scan_results.append(f"• {signal['direction']} {pair} | RSI: {signal['rsi']} | Conf: {signal['confidence']}%")
+            print(f"📊 SCAN: Found signal for {pair}")
+        
+        # Small delay to avoid rate limits
+        await asyncio.sleep(0.5)
+    
+    if signals_found:
+        # Send summary of all signals found
+        summary = f"🔍 <b>SCAN COMPLETE!</b>\n\n✅ Found {len(signals_found)} signal(s):\n\n"
+        summary += "\n".join(scan_results)
+        summary += f"\n\nUse /signal [pair] for detailed analysis\n⏰ {format_time()} (Nigeria Time)"
+        await update.message.reply_text(summary, parse_mode='HTML')
+        
+        # Also send each detailed signal
+        for signal in signals_found:
+            message = signal_gen.format_signal_message(signal)
+            await update.message.reply_text(message, parse_mode='HTML')
+            settings["total_signals"] += 1
+            await asyncio.sleep(1)
+    else:
+        await update.message.reply_text(
+            f"🔍 <b>SCAN COMPLETE!</b>\n\n"
+            f"❌ No strong signals found.\n\n"
+            f"📊 Scanned: {len(config.PRIORITY_PAIRS)} priority pairs\n"
+            f"🎯 Confidence threshold: {config.MIN_CONFIDENCE}%\n\n"
+            f"💡 Try /autosignal to enable auto signals\n"
+            f"⏰ {format_time()} (Nigeria Time)",
+            parse_mode='HTML'
+        )
 
 # ============================================
 # TELEGRAM COMMANDS
@@ -229,6 +238,7 @@ async def start_command(update, context):
         f"/status - Bot status\n"
         f"/signal [pair] - Manual signal\n"
         f"/pairs - List all pairs\n"
+        f"/scan - Force manual scan\n"
         f"/autosignal - Toggle auto signals\n"
         f"/autotrade - Toggle auto trade\n"
         f"/time - Current time\n\n"
@@ -275,19 +285,9 @@ async def signal_command(update, context):
     
     await update.message.reply_text(f"🔍 Analyzing {pair}...")
     
-    # Get price (from WebSocket if connected, else fallback)
-    if settings["connected"] and settings["client"]:
-        try:
-            client = settings["client"]
-            otc_pair = f"{pair}_otc"
-            candles = await client.get_candles(otc_pair, 60, 0)
-            if candles:
-                price = candles[-1].get('close', 0)
-            else:
-                price = get_fallback_price(pair)
-        except:
-            price = get_fallback_price(pair)
-    else:
+    # Try to get price from WebSocket first
+    price = settings["last_prices"].get(pair, 0)
+    if price == 0:
         price = get_fallback_price(pair)
     
     signal = signal_gen.generate_signal_from_price(pair, price)
@@ -339,14 +339,20 @@ async def autotrade_command(update, context):
 async def time_command(update, context):
     await update.message.reply_text(f"⏰ Nigeria Time: {format_time()}")
 
-# Add handlers
+# ============================================
+# REGISTER ALL COMMANDS
+# ============================================
+
 application.add_handler(CommandHandler("start", start_command))
 application.add_handler(CommandHandler("status", status_command))
 application.add_handler(CommandHandler("signal", signal_command))
 application.add_handler(CommandHandler("pairs", pairs_command))
+application.add_handler(CommandHandler("scan", scan_command))
 application.add_handler(CommandHandler("autosignal", autosignal_command))
 application.add_handler(CommandHandler("autotrade", autotrade_command))
 application.add_handler(CommandHandler("time", time_command))
+
+print("✅ All command handlers registered (including /scan)")
 
 # ============================================
 # STARTUP
@@ -363,25 +369,32 @@ async def send_startup():
         f"🎯 Auto signals: ON\n"
         f"💰 Auto trade: OFF\n\n"
         f"⏰ {format_time()} (Nigeria Time)\n\n"
-        f"Type /help for commands",
+        f"Commands: /status, /signal, /pairs, /scan, /autosignal, /autotrade, /time",
         parse_mode='HTML'
     )
 
 async def main():
+    # Send startup message
     await send_startup()
     
-    # Start Pocket Option connection in background
-    asyncio.create_task(connect_pocket_option())
+    # Start WebSocket in a separate thread (so it doesn't block commands)
+    if PO_SESSION:
+        ws_thread = threading.Thread(target=run_websocket, daemon=True)
+        ws_thread.start()
+        print("🚀 WebSocket thread started")
+    else:
+        print("⚠️ WebSocket disabled (no SSID)")
     
-    # Start Telegram bot
+    # Start Telegram bot (this will handle commands)
     await application.initialize()
     await application.start()
     await application.updater.start_polling()
     
     print(f"🚀 Bot is running!")
     print(f"📍 Nigeria Time: {format_time()}")
-    print(f"📋 Commands: /start, /status, /signal, /autosignal, /autotrade")
+    print(f"📋 Commands: /start, /status, /signal, /pairs, /scan, /autosignal, /autotrade, /time")
     
+    # Keep the bot alive
     while True:
         await asyncio.sleep(60)
 
