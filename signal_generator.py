@@ -1,124 +1,124 @@
 """
-Signal Generator
+Signal Generator - Real-time RSI calculation and signal formatting
 """
 
-import pandas as pd
-import numpy as np
-from datetime import datetime
-from indicators import TechnicalIndicators
+import random
+from datetime import datetime, timedelta
 import config
 
 class SignalGenerator:
     def __init__(self):
-        self.indicators = TechnicalIndicators()
-        print("🎯 Signal generator initialized")
+        self.last_prices = {}
+        self.last_rsi = {}
     
-    def analyze_pair(self, df, pair, timeframe):
-        if df is None or len(df) < 50:
-            return None
+    def calculate_rsi(self, prices, period=14):
+        """Calculate RSI from price list"""
+        if len(prices) < period:
+            return 50
         
-        close_prices = df['close']
-        high_prices = df['high']
-        low_prices = df['low']
+        gains = []
+        losses = []
         
-        # Calculate indicators
-        rsi = self.indicators.calculate_rsi(close_prices, config.RSI_PERIOD)
-        ema_fast = self.indicators.calculate_ema(close_prices, config.EMA_FAST)
-        ema_slow = self.indicators.calculate_ema(close_prices, config.EMA_SLOW)
-        macd_line, signal_line, macd_hist = self.indicators.calculate_macd(
-            close_prices, config.MACD_FAST, config.MACD_SLOW, config.MACD_SIGNAL
-        )
-        resistance, support = self.indicators.calculate_support_resistance(high_prices, low_prices)
+        for i in range(1, len(prices)):
+            change = prices[i] - prices[i-1]
+            if change > 0:
+                gains.append(change)
+                losses.append(0)
+            else:
+                gains.append(0)
+                losses.append(abs(change))
         
-        # Get latest values
-        current_price = close_prices.iloc[-1]
-        current_rsi = rsi.iloc[-1]
-        prev_rsi = rsi.iloc[-2] if len(rsi) > 1 else current_rsi
-        current_ema_fast = ema_fast.iloc[-1]
-        current_ema_slow = ema_slow.iloc[-1]
-        current_macd_hist = macd_hist.iloc[-1]
-        prev_macd_hist = macd_hist.iloc[-2] if len(macd_hist) > 1 else current_macd_hist
-        current_resistance = resistance.iloc[-1]
-        current_support = support.iloc[-1]
+        avg_gain = sum(gains[-period:]) / period if gains else 0
+        avg_loss = sum(losses[-period:]) / period if losses else 0
         
-        # Calculate confidence
-        confidence = 0
-        signals_detected = []
+        if avg_loss == 0:
+            return 100
         
-        # RSI
-        if current_rsi < config.RSI_OVERSOLD:
-            confidence += config.WEIGHTS["RSI_EXTREME"]
-            signals_detected.append(f"RSI Oversold ({current_rsi:.1f})")
-        elif current_rsi > config.RSI_OVERBOUGHT:
-            confidence -= config.WEIGHTS["RSI_EXTREME"]
-            signals_detected.append(f"RSI Overbought ({current_rsi:.1f})")
+        rs = avg_gain / avg_loss
+        rsi = 100 - (100 / (1 + rs))
+        return round(rsi, 1)
+    
+    def generate_signal_from_price(self, pair, price):
+        """Generate signal based on price and simulated RSI"""
+        # Store price history
+        if pair not in self.last_prices:
+            self.last_prices[pair] = []
         
-        # EMA
-        if current_ema_fast > current_ema_slow and current_price > current_ema_fast:
-            confidence += config.WEIGHTS["EMA_ALIGNMENT"]
-            signals_detected.append("EMA Bullish Alignment")
-        elif current_ema_fast < current_ema_slow and current_price < current_ema_fast:
-            confidence -= config.WEIGHTS["EMA_ALIGNMENT"]
-            signals_detected.append("EMA Bearish Alignment")
+        self.last_prices[pair].append(price)
         
-        # MACD
-        if current_macd_hist > 0 and prev_macd_hist <= 0:
-            confidence += config.WEIGHTS["MACD_CROSSOVER"]
-            signals_detected.append("MACD Bullish Crossover")
-        elif current_macd_hist < 0 and prev_macd_hist >= 0:
-            confidence -= config.WEIGHTS["MACD_CROSSOVER"]
-            signals_detected.append("MACD Bearish Crossover")
+        # Keep last 20 prices for RSI calculation
+        if len(self.last_prices[pair]) > 20:
+            self.last_prices[pair] = self.last_prices[pair][-20:]
         
-        # Support/Resistance
-        if current_price >= current_resistance * 0.99:
-            confidence -= config.WEIGHTS["SUPPORT_RESISTANCE"]
-            signals_detected.append(f"Near Resistance")
-        elif current_price <= current_support * 1.01:
-            confidence += config.WEIGHTS["SUPPORT_RESISTANCE"]
-            signals_detected.append(f"Near Support")
-        
-        if abs(confidence) < config.MIN_CONFIDENCE:
-            return None
-        
-        # Determine signal
-        if confidence >= 50:
-            signal_type = "STRONG_BUY"
-        elif confidence >= 20:
-            signal_type = "BUY"
-        elif confidence <= -50:
-            signal_type = "STRONG_SELL"
-        elif confidence <= -20:
-            signal_type = "SELL"
+        # Calculate RSI
+        if len(self.last_prices[pair]) >= 14:
+            rsi = self.calculate_rsi(self.last_prices[pair])
         else:
-            signal_type = "NEUTRAL"
+            rsi = 50
         
-        emoji = config.SIGNAL_EMOJIS.get(signal_type, "⚪")
+        self.last_rsi[pair] = rsi
+        
+        # Generate signal based on RSI
+        if rsi <= config.RSI_OVERSOLD:
+            direction = "BUY"
+            confidence = min(95, int(75 - rsi + 20))
+            reason = f"RSI Oversold ({rsi}) - Price may reverse UP"
+            emoji = "🟢🟢" if confidence >= 75 else "🟢"
+        elif rsi >= config.RSI_OVERBOUGHT:
+            direction = "SELL"
+            confidence = min(95, int(rsi - 70 + 20))
+            reason = f"RSI Overbought ({rsi}) - Price may reverse DOWN"
+            emoji = "🔴🔴" if confidence >= 75 else "🔴"
+        else:
+            return None
         
         return {
             'pair': pair,
-            'timeframe': timeframe,
-            'signal_type': signal_type,
-            'confidence': abs(confidence),
-            'direction': 'BUY' if confidence > 0 else 'SELL',
-            'price': current_price,
-            'rsi': round(current_rsi, 2),
-            'signals': signals_detected,
+            'flag': config.get_flag(pair),
+            'price': price,
+            'rsi': rsi,
+            'direction': direction,
+            'confidence': confidence,
             'emoji': emoji,
-            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            'reason': reason,
+            'timestamp': datetime.now().strftime("%I:%M %p")
         }
     
     def format_signal_message(self, signal):
-        header = f"{signal['emoji']} <b>{signal['direction']} {signal['pair']}</b> {signal['emoji']}"
+        """Format signal with 3-minute head start and martingale levels"""
+        entry_time = datetime.now() + timedelta(minutes=config.SIGNAL_TIMER_MINUTES)
         
-        details = f"""
-📊 <b>Timeframe:</b> {signal['timeframe']}
-💰 <b>Price:</b> ${signal['price']:.5f}
-🎯 <b>Confidence:</b> {signal['confidence']}%
-📈 <b>RSI:</b> {signal['rsi']}"""
+        martingale_lines = []
+        for i in range(1, config.MARTINGALE_LEVELS + 1):
+            level_time = entry_time + timedelta(minutes=i * config.MARTINGALE_INTERVAL)
+            martingale_lines.append(f" Level {i} → {level_time.strftime('%I:%M %p')}")
         
-        indicators = "\n\n<b>Indicators:</b>\n• "
-        indicators += "\n• ".join(signal['signals'])
+        tp_mult = 1.005 if signal['direction'] == "BUY" else 0.995
+        sl_mult = 0.995 if signal['direction'] == "BUY" else 1.005
         
-        timestamp = f"\n\n⏰ {signal['timestamp']}"
+        tp = signal['price'] * tp_mult
+        sl = signal['price'] * sl_mult
         
-        return header + details + indicators + timestamp
+        return f"""
+🔔 NEW SIGNAL!
+
+🎫 Trade: {signal['flag']} {signal['pair']} (OTC)
+⏳ Timer: {config.SIGNAL_TIMER_MINUTES} minutes
+➡️ Entry: {entry_time.strftime('%I:%M %p')}
+📈 Direction: {signal['direction']} {signal['emoji']}
+
+💪 <b>Confidence:</b> {signal['confidence']}%
+
+📊 <b>Technical Analysis:</b>
+• RSI: {signal['rsi']}
+• {signal['reason']}
+
+↪️ <b>Martingale Levels:</b>
+{chr(10).join(martingale_lines)}
+
+💰 <b>Entry Price:</b> ${signal['price']:.5f}
+🎯 <b>Take Profit:</b> ${tp:.5f}
+🛑 <b>Stop Loss:</b> ${sl:.5f}
+
+⏰ {signal['timestamp']} (Nigeria Time)
+"""
