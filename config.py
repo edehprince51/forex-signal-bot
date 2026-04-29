@@ -1,191 +1,165 @@
 """
-Configuration settings for Pocket Option Trading Bot
-COMPLETE LIST - ALL PAIRS FROM YOUR IMAGES
+POCKET OPTION TRADING BOT - CONFIGURATION
+87 Pairs | Binance (Crypto) + Alpha Vantage (Forex/Stocks)
 """
 
 # ============================================
-# FOREX PAIRS (All from your images)
+# CRYPTO PAIRS (Binance - 40 pairs)
 # ============================================
 
-# Majors
-MAJOR_PAIRS = [
-    "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "NZDUSD", "USDCHF",
+CRYPTO_PAIRS = [
+    # Major
+    "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "DOGEUSDT",
+    # Altcoins
+    "MATICUSDT", "DOTUSDT", "AVAXUSDT", "LINKUSDT", "LTCUSDT", "NEARUSDT",
+    "ATOMUSDT", "APTUSDT", "SUIUSDT", "ARBUSDT", "OPUSDT",
+    # Meme Coins
+    "SHIBUSDT", "PEPEUSDT", "FLOKIUSDT", "WIFUSDT", "BONKUSDT",
+    # DeFi
+    "AAVEUSDT", "UNIUSDT", "CAKEUSDT", "CRVUSDT", "MKRUSDT", "COMPUSDT",
+    # Gaming
+    "SANDUSDT", "MANAUSDT", "GALAUSDT", "AXSUSDT", "IMXUSDT",
+    # Storage
+    "FILUSDT", "ARUSDT", "STORJUSDT",
+    # Oracle & Exchange
+    "API3USDT", "BANDUSDT", "CROUSDT", "OKBUSDT",
 ]
 
-# Minor Forex Crosses
-MINOR_PAIRS = [
-    "EURGBP", "EURJPY", "EURCHF", "EURCAD", "EURAUD", "EURNZD",
-    "GBPJPY", "GBPCHF", "GBPCAD", "GBPAUD", "GBPNZD",
-    "AUDJPY", "AUDCHF", "AUDCAD", "AUDNZD",
-    "NZDJPY", "NZDCHF", "CADJPY", "CADCHF", "CHFJPY",
-]
-
-# Exotic Forex (From your images)
-EXOTIC_PAIRS = [
-    # African currencies
-    "USDZAR", "USDNGN", "NGNUSD", "USDKES", "KESUSD", "USDTND", "TNDUSD",
-    "USDMAD", "MADUSD", "USDDZD", "USDEGP", "USDLBP", "LBPUSD", "USDZAR",
-    # Asian currencies
-    "USDSGD", "USDIDR", "USDPHP", "USDTHB", "USDMYR", "USDPKR", "USDBDT",
-    "USDINR", "USDCNY", "USDHKD", "USDTWD", "USDKRW", "USDVND",
-    # Middle Eastern
-    "AEDCNY", "SARCNY", "QARCNY", "OMRCNY", "BHDCNY", "JODCNY", "YERUSD",
-    "USDTRY", "USDRUB", "USDILS",
-    # Latin American
-    "USDMXN", "USDBRL", "USDARS", "USDCLP", "USDCOP", "USDPEN", "USDUYU",
-    # European exotics
-    "EURTRY", "EURHUF", "EURPLN", "EURCZK", "EURRUB", "EURRON", "EURZAR",
-    "GBPZAR", "GBPTRY", "CHFNOK", "CHFSEK", "NOKSEK",
-    # Other crosses from your images
-    "NGNINR", "NGNCNY", "KESUSD", "UAHUSD", "MADUSD", "FIIRGRP", "NGNUSD",
-]
-
-# All Forex combined
-FOREX_PAIRS = MAJOR_PAIRS + MINOR_PAIRS + EXOTIC_PAIRS
-
-# OTC Forex (Pocket Option uses _otc suffix)
-OTC_FOREX = [f"{pair}_otc" for pair in FOREX_PAIRS]
-
 # ============================================
-# INDICES (From your images)
+# FOREX MAJORS (7 pairs)
 # ============================================
 
-INDICES = [
-    "US100", "US30", "US500",           # US indices
-    "DJI30", "SP500",                   # Alternative names
-    "AEX25", "CAC40",                   # European
-    "D30EUR", "E35EUR", "E50EUR", "F40EUR",
-    "GER30", "UK100", "FRA40", "ESP35",
-    "HONGKONG33", "JPN225",             # Asian
-    "AUS200", "100GBP",                 # Australia & UK
-    "NIFTY50", "KOSPI", "RUSSIA", "BRAZIL50",
-]
-
-INDICES_OTC = [f"{idx}_otc" for idx in INDICES]
-
-# ============================================
-# COMMODITIES (From your images)
-# ============================================
-
-COMMODITIES = [
-    "Gold", "Silver", "Platinum", "Palladium",
-    "BrentOil", "WTICrudeOil", "NaturalGas",
-    "Copper", "Aluminum", "Zinc", "Lead", "Nickel",
-    "Corn", "Wheat", "Soybean", "Coffee", "Sugar", "Cotton",
-]
-
-COMMODITIES_OTC = [f"{comm}_otc" for comm in COMMODITIES]
-
-# ============================================
-# CRYPTOCURRENCIES (From your images)
-# ============================================
-
-CRYPTOS = [
-    "Bitcoin", "Ethereum", "Solana", "Cardano", "Dogecoin",
-    "Ripple", "Litecoin", "Chainlink", "Avalanche", "Polygon",
-    "TRON", "Polkadot", "Uniswap", "Stellar", "Algorand",
-    "VeChain", "Theta", "Filecoin", "InternetComputer",
-    "ApeCoin", "ShibaInu", "Fantom", "NearProtocol",
-]
-
-CRYPTOS_OTC = [f"{crypto}_otc" for crypto in CRYPTOS]
-
-# ============================================
-# STOCKS (From your images)
-# ============================================
-
-STOCKS = [
-    # Tech
-    "Apple", "Microsoft", "Google", "Meta", "Amazon", "Netflix",
-    "Tesla", "NVIDIA", "AMD", "Intel", "Cisco", "Oracle",
-    "IBM", "Qualcomm", "TexasInstruments", "Adobe", "Salesforce",
-    "Palantir", "Coinbase", "MicroStrategy",
-    # Banking/Finance
-    "JPMorgan", "BankofAmerica", "WellsFargo", "Citigroup",
-    "GoldmanSachs", "MorganStanley", "Visa", "Mastercard",
-    "AmericanExpress", "BlackRock", "BerkshireHathaway",
-    # Healthcare
-    "JohnsonJohnson", "Pfizer", "Merck", "AbbVie", "Abbott",
-    "ThermoFisher", "UnitedHealth", "Moderna", "BioNTech",
-    # Consumer
-    "McDonalds", "Starbucks", "CocaCola", "Pepsi", "Nike",
-    "Walmart", "Costco", "Target", "HomeDepot", "Lowes",
-    "Disney", "Netflix",
-    # Industrial
-    "Boeing", "FedEx", "UPS", "Caterpillar", "3M", "Honeywell",
-    "GeneralElectric", "LockheedMartin", "Raytheon",
-    # Energy
-    "ExxonMobil", "Chevron", "ConocoPhillips", "Schlumberger",
-    "BP", "Shell", "TotalEnergies",
-    # European Stocks
-    "SAP", "NovoNordisk", "Nestle", "Roche", "Novartis",
-    "AstraZeneca", "HSBC", "Airbus", "Adidas", "LVMH",
-    # Asian Stocks
-    "Alibaba", "Tencent", "JDcom", "NetEase", "Baidu",
-    "Samsung", "Toyota", "Sony", "Mitsubishi",
-    # Other US Stocks
-    "GameStop", "AMC", "MarathonDigital", "RiotBlockchain",
-    "CoinbaseGlobal", "PalantirTechnologies", "Snowflake",
-    "CrowdStrike", "Zoom", "Shopify", "Spotify",
-]
-
-STOCKS_OTC = [f"{stock}_otc" for stock in STOCKS]
-
-# ============================================
-# COMPLETE MASTER LIST
-# ============================================
-
-ALL_PAIRS = (
-    FOREX_PAIRS + OTC_FOREX +
-    INDICES + INDICES_OTC +
-    COMMODITIES + COMMODITIES_OTC +
-    CRYPTOS + CRYPTOS_OTC +
-    STOCKS + STOCKS_OTC
-)
-
-# Category mapping
-ALL_INSTRUMENTS = {
-    "Forex": FOREX_PAIRS,
-    "Forex-OTC": OTC_FOREX,
-    "Indices": INDICES,
-    "Indices-OTC": INDICES_OTC,
-    "Commodities": COMMODITIES,
-    "Commodities-OTC": COMMODITIES_OTC,
-    "Crypto": CRYPTOS,
-    "Crypto-OTC": CRYPTOS_OTC,
-    "Stocks": STOCKS,
-    "Stocks-OTC": STOCKS_OTC,
+FOREX_MAJORS = {
+    "EURUSD": "EURUSD",
+    "GBPUSD": "GBPUSD",
+    "USDJPY": "USDJPY",
+    "AUDUSD": "AUDUSD",
+    "USDCAD": "USDCAD",
+    "NZDUSD": "NZDUSD",
+    "USDCHF": "USDCHF",
 }
 
 # ============================================
-# FLAGS FOR DISPLAY
+# FOREX MINORS (15 pairs)
+# ============================================
+
+FOREX_MINORS = {
+    "EURGBP": "EURGBP",
+    "EURJPY": "EURJPY",
+    "EURCHF": "EURCHF",
+    "EURCAD": "EURCAD",
+    "GBPAUD": "GBPAUD",
+    "GBPCAD": "GBPCAD",
+    "GBPCHF": "GBPCHF",
+    "AUDJPY": "AUDJPY",
+    "AUDCAD": "AUDCAD",
+    "AUDCHF": "AUDCHF",
+    "CADJPY": "CADJPY",
+    "NZDJPY": "NZDJPY",
+    "CHFJPY": "CHFJPY",
+    "EURAUD": "EURAUD",
+    "EURTRY": "EURTRY",
+}
+
+# ============================================
+# INDICES (10 pairs)
+# ============================================
+
+INDICES = {
+    "US100": "^IXIC",
+    "US30": "^DJI",
+    "US500": "^GSPC",
+    "GER30": "^GDAXI",
+    "UK100": "^FTSE",
+    "FRA40": "^FCHI",
+    "ESP35": "^IBEX",
+    "AUS200": "^AXJO",
+    "JPN225": "^N225",
+    "HK50": "^HSI",
+}
+
+# ============================================
+# COMMODITIES (5 pairs)
+# ============================================
+
+COMMODITIES = {
+    "Gold": "GC=F",
+    "Silver": "SI=F",
+    "BrentOil": "BZ=F",
+    "WTICrudeOil": "CL=F",
+    "NaturalGas": "NG=F",
+}
+
+# ============================================
+# STOCKS (10 pairs)
+# ============================================
+
+STOCKS = {
+    "Apple": "AAPL",
+    "Tesla": "TSLA",
+    "Microsoft": "MSFT",
+    "Amazon": "AMZN",
+    "Google": "GOOGL",
+    "Meta": "META",
+    "NVIDIA": "NVDA",
+    "AMD": "AMD",
+    "Netflix": "NFLX",
+    "Alibaba": "BABA",
+}
+
+# ============================================
+# FLAG EMOJIS FOR DISPLAY
 # ============================================
 
 FLAGS = {
-    # Forex Majors
+    # Forex
     "EURUSD": "🇪🇺🇺🇸", "GBPUSD": "🇬🇧🇺🇸", "USDJPY": "🇺🇸🇯🇵",
     "AUDUSD": "🇦🇺🇺🇸", "USDCAD": "🇺🇸🇨🇦", "NZDUSD": "🇳🇿🇺🇸", "USDCHF": "🇺🇸🇨🇭",
-    # Forex Minors
     "EURGBP": "🇪🇺🇬🇧", "EURJPY": "🇪🇺🇯🇵", "EURCHF": "🇪🇺🇨🇭", "EURCAD": "🇪🇺🇨🇦",
-    "GBPJPY": "🇬🇧🇯🇵", "AUDJPY": "🇦🇺🇯🇵",
-    # Exotics
-    "USDZAR": "🇺🇸🇿🇦", "USDNGN": "🇺🇸🇳🇬", "USDKES": "🇺🇸🇰🇪", "USDTRY": "🇺🇸🇹🇷",
-    "USDMXN": "🇺🇸🇲🇽", "USDBRL": "🇺🇸🇧🇷", "USDRUB": "🇺🇸🇷🇺", "USDSGD": "🇺🇸🇸🇬",
+    "GBPAUD": "🇬🇧🇦🇺", "GBPCAD": "🇬🇧🇨🇦", "GBPCHF": "🇬🇧🇨🇭",
+    "AUDJPY": "🇦🇺🇯🇵", "AUDCAD": "🇦🇺🇨🇦", "AUDCHF": "🇦🇺🇨🇭",
+    "CADJPY": "🇨🇦🇯🇵", "NZDJPY": "🇳🇿🇯🇵", "CHFJPY": "🇨🇭🇯🇵",
+    "EURAUD": "🇪🇺🇦🇺", "EURTRY": "🇪🇺🇹🇷",
     # Indices
-    "US100": "📊", "US30": "📈", "US500": "📊", "DJI30": "📈", "SP500": "📊",
-    "GER30": "📊🇩🇪", "UK100": "📊🇬🇧", "FRA40": "📊🇫🇷", "JPN225": "📊🇯🇵",
+    "US100": "📊", "US30": "📈", "US500": "📊", "GER30": "📊🇩🇪",
+    "UK100": "📊🇬🇧", "FRA40": "📊🇫🇷", "ESP35": "📊🇪🇸",
+    "AUS200": "📊🇦🇺", "JPN225": "📊🇯🇵", "HK50": "📊🇭🇰",
     # Commodities
     "Gold": "🥇", "Silver": "🥈", "BrentOil": "🛢️", "WTICrudeOil": "🛢️", "NaturalGas": "🔥",
-    # Crypto
-    "Bitcoin": "₿", "Ethereum": "⟠", "Solana": "⚡", "Dogecoin": "🐕",
     # Stocks
-    "Apple": "🍎", "Tesla": "🚗", "Microsoft": "💻", "Amazon": "📦", "Google": "🔍",
+    "Apple": "🍎", "Tesla": "🚗", "Microsoft": "💻", "Amazon": "📦",
+    "Google": "🔍", "Meta": "📘", "NVIDIA": "🎮", "AMD": "💻",
+    "Netflix": "🎬", "Alibaba": "🛒",
+    # Crypto
+    "BTCUSDT": "₿", "ETHUSDT": "⟠", "BNBUSDT": "🟡", "SOLUSDT": "⚡",
+    "XRPUSDT": "✖️", "ADAUSDT": "🟣", "DOGEUSDT": "🐕", "MATICUSDT": "🟣",
+    "SHIBUSDT": "🐕", "PEPEUSDT": "🐸",
 }
 
 def get_flag(pair):
     """Get flag emoji for a pair"""
-    base = pair.replace("_otc", "")
-    return FLAGS.get(base, "🌍")
+    return FLAGS.get(pair, "🌍")
+
+# ============================================
+# COMBINED PAIRS LIST
+# ============================================
+
+ALL_PAIRS = {
+    "crypto": CRYPTO_PAIRS,
+    "forex_majors": list(FOREX_MAJORS.keys()),
+    "forex_minors": list(FOREX_MINORS.keys()),
+    "indices": list(INDICES.keys()),
+    "commodities": list(COMMODITIES.keys()),
+    "stocks": list(STOCKS.keys()),
+}
+
+# Priority pairs for quick scanning
+PRIORITY_PAIRS = (
+    CRYPTO_PAIRS[:15] +
+    list(FOREX_MAJORS.keys()) +
+    ["Gold", "Bitcoin"] +
+    ["Apple", "Tesla", "Microsoft"]
+)
 
 # ============================================
 # TECHNICAL SETTINGS
@@ -197,19 +171,14 @@ RSI_OVERBOUGHT = 70
 SIGNAL_TIMER_MINUTES = 3
 MARTINGALE_LEVELS = 3
 MARTINGALE_INTERVAL = 3
-SIGNAL_COOLDOWN_SECONDS = 300  # 5 minutes between same pair
-MIN_CONFIDENCE = 50
+SIGNAL_COOLDOWN_SECONDS = 600  # 10 minutes between same pair
+MIN_CONFIDENCE = 25
+SCAN_INTERVAL_SECONDS = 660  # 11 minutes (between 10-12)
 
-# Priority pairs for initial subscription (top 20 most liquid)
-PRIORITY_PAIRS = [
-    "EURUSD", "GBPUSD", "USDJPY", "Gold", "Bitcoin",
-    "US100", "Apple", "Tesla", "Silver", "Ethereum",
-    "Microsoft", "Amazon", "US30", "EURGBP", "USDCHF",
-]
-
-print(f"✅ Loaded {len(ALL_PAIRS)} total instruments")
-print(f"   Forex: {len(FOREX_PAIRS)} (+{len(OTC_FOREX)} OTC)")
-print(f"   Indices: {len(INDICES)} (+{len(INDICES_OTC)} OTC)")
-print(f"   Commodities: {len(COMMODITIES)} (+{len(COMMODITIES_OTC)} OTC)")
-print(f"   Crypto: {len(CRYPTOS)} (+{len(CRYPTOS_OTC)} OTC)")
-print(f"   Stocks: {len(STOCKS)} (+{len(STOCKS_OTC)} OTC)")
+print(f"✅ Loaded {len(CRYPTO_PAIRS) + len(FOREX_MAJORS) + len(FOREX_MINORS) + len(INDICES) + len(COMMODITIES) + len(STOCKS)} total instruments")
+print(f"   Crypto: {len(CRYPTO_PAIRS)}")
+print(f"   Forex Majors: {len(FOREX_MAJORS)}")
+print(f"   Forex Minors: {len(FOREX_MINORS)}")
+print(f"   Indices: {len(INDICES)}")
+print(f"   Commodities: {len(COMMODITIES)}")
+print(f"   Stocks: {len(STOCKS)}")
